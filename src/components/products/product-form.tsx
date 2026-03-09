@@ -28,6 +28,16 @@ import type { ICategory } from "@/services/categoryService";
 import { Switch } from "../ui/switch";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { HexColorPicker } from "react-colorful";
+
+// import type {
+//   ZodObject,
+//   ZodString,
+//   ZodNumber,
+//   ZodDefault,
+//   ZodOptional,
+//   ZodBoolean,
+//   ZodTypeAny,
+// } from "node_modules/zod/v3/types.d.cts";
 //import { ColorPickerField } from "../colorPicker";
 
 interface ProductFormProps {

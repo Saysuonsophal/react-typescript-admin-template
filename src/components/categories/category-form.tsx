@@ -7,7 +7,7 @@ import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import {
   Field,
-  FieldDescription,
+  //FieldDescription,
   FieldError,
   FieldGroup,
   FieldLabel,
@@ -90,9 +90,10 @@ export function CategoryForm({ open, setOpen }: Props) {
         </DialogTrigger> */}
       <DialogContent className="sm:max-w-sm">
         <DialogHeader>
-          <DialogTitle>Edit profile</DialogTitle>
+          <DialogTitle>Add Category</DialogTitle>
           <DialogDescription>
-            Make changes to your profile here. Click save when you&apos;re done.
+            Make add to your Category here. Click save change when you&apos;re
+            done.
           </DialogDescription>
         </DialogHeader>
 

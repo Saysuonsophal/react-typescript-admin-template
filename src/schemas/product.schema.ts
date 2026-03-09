@@ -11,7 +11,7 @@ export const productSchema = z.object({
   price: z.number().min(1, "Price is required"),
   qty: z.number().int().min(0, "Quantity must be 0 or more"),
   categoryId: z.number(),
-  description: z.string().optional(),
+  description: z.string(),
   color: z.string().min(1, "Please select a color"),
   //.regex(/^#([0-9A-F]{3}){1,2}$/i, "Invalid HEX color")
   // .refine((val) => val !== "#3b82f6", {

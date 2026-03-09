@@ -1,10 +1,10 @@
 import { HexColorPicker } from "react-colorful";
-import {
-  Popover,
-  PopoverTrigger,
-  PopoverContent,
-} from "@/components/ui/popover";
-import { Input } from "@/components/ui/input";
+// import {
+//   Popover,
+//   PopoverTrigger,
+//   PopoverContent,
+// } from "@/components/ui/popover";
+// import { Input } from "@/components/ui/input";
 import { useState } from "react";
 
 type ColorPickerFieldProps = {
@@ -19,7 +19,7 @@ export function ColorPickerField({
   value,
   onChange,
   presets = [],
-  showInput = true,
+  //showInput = true,
   defaultColor = "#3b82f6",
 }: ColorPickerFieldProps) {
   const currentColor = value || defaultColor;
