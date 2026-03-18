@@ -27,24 +27,28 @@ export function ActionMenu({ onEdit, onDelete, onView }: ActionMenuProps) {
 
       <DropdownMenuContent align="end" className="w-10 ">
         <DropdownMenuLabel>Actions</DropdownMenuLabel>
+        {onEdit && (
+          <DropdownMenuItem onClick={onEdit}>
+            <Pencil className="h-4 w-4" />
+            Edit
+          </DropdownMenuItem>
+        )}
 
-        <DropdownMenuItem onClick={onEdit}>
-          <Pencil className="h-4 w-4" />
-          Edit
-        </DropdownMenuItem>
-
-        <DropdownMenuItem onClick={onView}>
-          <Eye className="h-4 w-4" />
-          View
-        </DropdownMenuItem>
-
-        <DropdownMenuItem
-          onClick={onDelete}
-          className="text-red-600 focus:text-red-600"
-        >
-          <Trash2 className="h-4 w-4 text-red-500" />
-          Delete
-        </DropdownMenuItem>
+        {onView && (
+          <DropdownMenuItem onClick={onView}>
+            <Eye className="h-4 w-4" />
+            View
+          </DropdownMenuItem>
+        )}
+        {onDelete && (
+          <DropdownMenuItem
+            onClick={onDelete}
+            className="text-red-600 focus:text-red-600"
+          >
+            <Trash2 className="h-4 w-4 text-red-500" />
+            Delete
+          </DropdownMenuItem>
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   );

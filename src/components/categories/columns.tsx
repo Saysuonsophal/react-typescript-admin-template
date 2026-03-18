@@ -2,19 +2,20 @@
 
 import type { ColumnDef } from "@tanstack/react-table";
 import { ActionMenu } from "../users/action-tooltip";
-import type { ICategory } from "@/services/categoryService";
+import type { ICategory } from "@/components/types/category";
 import { format } from "date-fns";
 
 // This type is used to define the shape of our data.
 // You can use a Zod schema here if you want.
-// export type Payment = {
-//   id: string;
-//   amount: number;
-//   status: "pending" | "processing" | "success" | "failed";
-//   email: string;
-// };
+export type Props = {
+  onEditCategory: (category: ICategory) => void;
+  onDeleteCatgory: (category: ICategory) => void;
+};
 
-export const columns: ColumnDef<ICategory>[] = [
+export const columns = ({
+  onEditCategory,
+  onDeleteCatgory,
+}: Props): ColumnDef<ICategory>[] => [
   {
     accessorKey: "id",
     header: "ID",
@@ -43,13 +44,10 @@ export const columns: ColumnDef<ICategory>[] = [
         <div className=" items-center justify-center max-w-[50px]">
           <ActionMenu
             onEdit={() => {
-              alert(`Edite name: ${row.original.name}`);
-            }}
-            onView={() => {
-              alert(`View name: ${row.original.name}`);
+              onEditCategory(row.original);
             }}
             onDelete={() => {
-              alert(`Are you sure to Delete user ${row.original.name}?`);
+              onDeleteCatgory(row.original);
             }}
           />
         </div>

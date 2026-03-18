@@ -23,10 +23,10 @@ export function ColorPickerField({
   defaultColor = "#3b82f6",
 }: ColorPickerFieldProps) {
   const currentColor = value || defaultColor;
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(false);
 
   return (
-    <div className="flex items-center gap-3">
+    <div className="relative flex items-center gap-3">
       {/* Preset Colors */}
       {/* {presets.length > 0 &&
         presets.map((color) => (
@@ -40,7 +40,6 @@ export function ColorPickerField({
             style={{ backgroundColor: color }}
           />
         ))} */}
-
       {/* Popover Picker */}
       {/* <Popover>
         <PopoverTrigger asChild>
@@ -55,7 +54,6 @@ export function ColorPickerField({
           <HexColorPicker color={currentColor} onChange={onChange} />
         </PopoverContent>
       </Popover> */}
-
       {/* Optional Hex Input */}
       {/* {showInput && (
         <Input
@@ -64,10 +62,9 @@ export function ColorPickerField({
           onChange={(e) => onChange(e.target.value)}
         />
       )} */}
-
       {/* Preview Box */}
       <div
-        className="flex items-center gap-3 border rounded-lg p-2 cursor-pointer"
+        className=" flex items-center gap-3 border rounded-lg p-2 cursor-pointer"
         onClick={() => setOpen(!open)}
       >
         <div
@@ -76,9 +73,11 @@ export function ColorPickerField({
         />
         <span className="text-sm">{value}</span>
       </div>
-
       {open && (
-        <div className="space-y-4 p-4 rounded-xl border bg-popover shadow-md">
+        <div
+          className={`absolute right-0 top-full z-50 space-y-3 p-2 overflow-hidden rounded-xl border bg-popover shadow-md transform transition-all duration-300 ease-out origin-top ${open ? "scale-95 opacity-100" : "opacity-10 scale-100"}`}
+          onClick={(e) => e.stopPropagation()}
+        >
           {/* Main Saturation Picker */}
           <HexColorPicker color={value} onChange={onChange} />
 

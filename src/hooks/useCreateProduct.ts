@@ -1,5 +1,21 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { createProduct } from "@/services/productService";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  createProduct,
+  deleteProduct,
+  getProduct,
+  updateProduct,
+} from "@/services/productService";
+import { toast } from "sonner";
+import type {
+  productSchema,
+} from "@/schemas/product.schema";
+
+export function useGetProduct() {
+  return useQuery({
+    queryKey: ["products"],
+    queryFn: getProduct,
+  });
+}
 
 export function useCreateProduct() {
   const queryClient = useQueryClient();
@@ -18,3 +34,32 @@ export function useCreateProduct() {
     },
   });
 }
+export function useUpdateProduct() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, request }: { id: number; request: productSchema }) =>
+      updateProduct(id, request), //HTTP method POST request API
+    onSuccess: () => {
+      // Clear cached and query API again
+      queryClient.invalidateQueries({
+        queryKey: ["products"],
+      });
+    },
+    onError: (err) => {
+      console.error("Failed to update product:", err.message);
+      toast.error("Failed to update product");
+    },
+  });
+}
+
+export const useDeleteProduct = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id }: { id: number }) => {
+      return deleteProduct(id);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["products"] });
+    },
+  });
+};

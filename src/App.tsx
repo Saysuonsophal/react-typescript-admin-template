@@ -11,7 +11,9 @@ import { ProductAPI } from "./pages/product-api";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ColorPage } from "./pages/colorpage";
 import { CategoryPage } from "./pages/category-page";
-import { Toaster } from "sonner";
+
+import { CustomerPage } from "./pages/customers";
+import { Product } from "./pages/Product";
 
 // Create a client
 const queryClient = new QueryClient();
@@ -35,9 +37,10 @@ function App() {
             <Route path="/products-api" element={<ProductAPI />}></Route>
             <Route path="/colors" element={<ColorPage />}></Route>
             <Route path="/categories" element={<CategoryPage />}></Route>
+            <Route path="/customers" element={<CustomerPage />}></Route>
+            <Route path="/product" element={<Product />}></Route>
           </Route>
         </Routes>
-        <Toaster />
       </BrowserRouter>
     </QueryClientProvider>
   );

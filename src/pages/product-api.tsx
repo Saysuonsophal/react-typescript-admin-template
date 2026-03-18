@@ -6,12 +6,21 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
+import type { IProduct } from "@/components/types/products";
+import { Plus } from "lucide-react";
+import { ConfirmDelete } from "@/components/categories/confirmModal";
+import { useDeleteProduct } from "@/hooks/useCreateProduct";
+import { toast } from "sonner";
 
 //import { useEffect, useState } from "react";
 
 export const ProductAPI = () => {
   const [searchInput, setsearchInput] = useState("");
   const [searchTerm, setsearchTerm] = useState("");
+  const [drawerOpen, setdrawerOpen] = useState(false);
+  const { mutate: deleteProductMutate } = useDeleteProduct();
+  const [isDelete, setisDelete] = useState(false);
+  const [product, setProduct] = useState<IProduct | undefined>(undefined);
 
   //New way Fetching data API with TanStack Query Hook
 
@@ -39,6 +48,44 @@ export const ProductAPI = () => {
     setsearchTerm(searchInput);
     console.log("Search Term:", searchTerm);
   };
+  const handleEdit = (products: IProduct) => {
+    console.log("Row Edit Product:", products);
+    setProduct(products);
+    setdrawerOpen(true);
+  };
+  const handleAdd = () => {
+    setdrawerOpen(true);
+    setProduct(undefined); // no item, blank form
+  };
+  const handleClose = () => {
+    setdrawerOpen(false);
+    setProduct(undefined); // no item, blank form
+  };
+
+  const handlDelete = (products: IProduct) => {
+    console.log("Row Delete Product", products);
+    setProduct(products);
+    setisDelete(true);
+  };
+  const productconfirm = () => {
+    if (!product?.id) return;
+    deleteProductMutate(
+      { id: product.id },
+      {
+        onSuccess: () => {
+          toast.success("Product deleted successfully", {
+            position: "top-right",
+          });
+          setisDelete(false);
+        },
+        onError: (err) => {
+          toast.error(err.message || "Failed to delete Product");
+        },
+      },
+    );
+    console.log("payload Delete:", product);
+  };
+
   // 🟢 Step 3: Show data when ready
   return (
     <>
@@ -46,11 +93,24 @@ export const ProductAPI = () => {
         <div>
           <h1 className="text-2xl font-bold">Frontend + Backend</h1>
           <span className="text-sm text-muted-foreground">
-            Fetch API from Backend, TanStack query, Form, Zod Validation, Drawer
+            Fetch API from Backend, TanStack query, Form, Zod Validation, Drawer{" "}
+            <br />
+          </span>
+          <span className="text-sm text-muted-foreground">
+            Page(parent) → DrawerForm(middle) → Form(child)
           </span>
         </div>
         <div className="flex gap-2 ">
-          <AddProductDrawer />
+          <Button onClick={handleAdd}>
+            <Plus className="h-4 w-4" />
+            Add Product
+          </Button>
+
+          <AddProductDrawer
+            open={drawerOpen}
+            setOpen={handleClose}
+            products={product}
+          />
         </div>
       </div>
 
@@ -66,8 +126,20 @@ export const ProductAPI = () => {
 
         <Button onClick={handlSearch}>Search</Button>
       </div>
-      {query.isFetching && <div className="text-sm">Refreshing...</div>}
-      <DataTable columns={columns} data={query.data?.data ?? []} />
+      {/* {query.isFetching && <div className="text-sm">Refreshing...</div>} */}
+
+      <DataTable
+        columns={columns({ onEdit: handleEdit, onDelete: handlDelete })}
+        data={query.data?.data ?? []}
+      />
+      <ConfirmDelete<IProduct>
+        isOpen={isDelete}
+        setIsOpen={setisDelete}
+        item={product}
+        title="Delete Product"
+        getName={(item) => item?.name || ""}
+        confirmDelete={productconfirm}
+      />
     </>
   );
 };

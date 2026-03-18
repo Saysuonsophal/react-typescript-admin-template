@@ -2,7 +2,48 @@
   /* max-width: 1440px; */
   margin: 0 auto;
 }
+@layer base {
+  button {
+    cursor: pointer;
+  }
+}
+/* The circular pointer on the gradient canvas */
+.react-colorful__saturation-pointer {
+  width: 18px !important;
+  height: 18px !important;
+  border-width: 2px !important;
+}
 
+/* The pointer on the hue bar */
+.react-colorful__hue-pointer {
+  width: 18px !important;
+  height: 18px !important;
+  border-width: 2px !important;
+}
+
+/* The pointer on the alpha bar (if you ever use it) */
+.react-colorful__alpha-pointer {
+  width: 18px !important;
+  height: 18px !important;
+  border-width: 2px !important;
+}
+
+/* Optional — make the picker wider */
+.react-colorful {
+  width: 220px !important;
+}
+
+/* Optional — make the gradient canvas taller */
+.react-colorful__saturation {
+  border-radius: 4px 4px 0 0 !important;
+  height: 160px !important;
+}
+
+/* Optional — make hue bar thicker */
+.react-colorful__hue {
+  height: 16px !important;
+  border-radius: 4px !important;
+}
 .logo {
   height: 6em;
   padding: 1.5em;

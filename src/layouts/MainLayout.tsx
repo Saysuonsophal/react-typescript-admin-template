@@ -10,6 +10,7 @@ function MainLayout() {
 
       {/* other Way */}
       <Outlet />
+     
       <p className="text-center font-bold text-3xl m-3">Footer</p>
     </div>
   );

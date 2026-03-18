@@ -24,7 +24,9 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
-import { useCreateCategory } from "@/hooks/useCategory";
+import { useCreateCategory, useUpdateCategory } from "@/hooks/useCategory";
+import type { ICategory } from "../types/category";
+import { useEffect } from "react";
 
 // Validation Zod
 const formSchema = z.object({
@@ -36,14 +38,19 @@ const formSchema = z.object({
 interface Props {
   open: boolean;
   setOpen: (open: boolean) => void; //function close
+  category?: ICategory; // using data
 }
 
-export function CategoryForm({ open, setOpen }: Props) {
+export function CategoryForm({ open, setOpen, category }: Props) {
+  console.log("passed data category from page to form:", category);
   const { mutate: CreateCategoryMutate } = useCreateCategory();
+  const { mutate: UpdateCategoryMutate } = useUpdateCategory();
 
   const form = useForm({
     defaultValues: {
-      name: "",
+      //name: category ? category.name : "",
+      //or way:
+      name: category?.name || "",
       isActive: true,
     },
     // Calling validation zod
@@ -52,15 +59,34 @@ export function CategoryForm({ open, setOpen }: Props) {
     },
     onSubmit: async ({ value }) => {
       console.log("Payload submit field value:", value);
-      CreateCategoryMutate(value, {
-        onSuccess: () => {
-          toast.success("Category Createed successfully", {
-            position: "top-left",
-          });
-          form.reset();
-          setOpen(false);
-        },
-      });
+
+      if (category) {
+        UpdateCategoryMutate(
+          { id: category.id, request: value },
+          {
+            onSuccess: () => {
+              toast.success("Category Updated successfully", {
+                position: "top-right",
+              });
+              setOpen(false);
+              form.reset();
+              //resetForm(); // reset to default
+            },
+          },
+        );
+      } else {
+        CreateCategoryMutate(value, {
+          onSuccess: () => {
+            toast.success("Category Createed successfully", {
+              position: "top-right",
+            });
+
+            setOpen(false);
+            form.reset();
+            //resetForm(); // reset to default
+          },
+        });
+      }
 
       // notification toast
       //   toast("You submitted the following values:", {
@@ -79,21 +105,54 @@ export function CategoryForm({ open, setOpen }: Props) {
       //   });
     },
   });
+  // Helper to reset form to defaults
+  // const resetForm = () => {
+  //   form.reset({
+  //     name: "",
+  //     isActive: true,
+  //   });
+  // };
+  // Reset form whenever modal opens or category changes
+  // useEffect(() => {
+  //   if (open) {
+  //     form.reset({
+  //       name: category?.name || "",
+  //       isActive: category?.isActive ?? true,
+  //     });
+  //   }
+  // }, [category, open]);
 
-  console.log("Form open", open);
-  console.log("Form setOpen", setOpen);
+  //Usage: When switching Edit → Create, clear the form.
+
+  // useEffect(() => {
+  //   if (!category) {
+  //     form.reset();
+  //   }
+  // }, [category]);
+
+  useEffect(() => {
+    if (open) {
+      form.reset({
+        name: category?.name || "",
+        isActive: true,
+      });
+    }
+  }, [open, category]);
+
+  // console.log("Form open", open);
+  // console.log("Form setOpen", setOpen);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      {/* <DialogTrigger asChild>
-          <Button variant="outline">Open Dialog</Button>
-        </DialogTrigger> */}
       <DialogContent className="sm:max-w-sm">
         <DialogHeader>
-          <DialogTitle>Add Category</DialogTitle>
+          <DialogTitle>
+            {category ? "Edit Category" : "Add Category"}
+          </DialogTitle>
           <DialogDescription>
-            Make add to your Category here. Click save change when you&apos;re
-            done.
+            {category
+              ? "Update your category details below and click save changes."
+              : "Add a new category here. Click save changes when you’re done."}
           </DialogDescription>
         </DialogHeader>
 
@@ -119,6 +178,15 @@ export function CategoryForm({ open, setOpen }: Props) {
                       value={field.state.value}
                       onBlur={field.handleBlur}
                       onChange={(e) => field.handleChange(e.target.value)}
+                      //move cursor to end by default the browser automatically focuses
+                      onFocus={(e) => {
+                        const len = e.target.value.length;
+                        console.log("focuse length", len);
+                        setTimeout(
+                          () => e.target.setSelectionRange(len, len),
+                          0,
+                        );
+                      }}
                       aria-invalid={isInvalid}
                       placeholder="Enter Category Name"
                       autoComplete="off"
@@ -135,10 +203,12 @@ export function CategoryForm({ open, setOpen }: Props) {
 
         <DialogFooter>
           <DialogClose asChild>
-            <Button variant="outline">Cancel</Button>
+            <Button variant="outline" onClick={() => form.reset()}>
+              Cancel
+            </Button>
           </DialogClose>
           <Button type="submit" form="category-form">
-            Save changes
+            {category ? "Save changes" : "Create Category"}
           </Button>
         </DialogFooter>
       </DialogContent>

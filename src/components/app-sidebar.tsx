@@ -71,7 +71,7 @@ const data = {
         },
         {
           title: "Product",
-          url: "/products-api",
+          url: "/product",
         },
 
         {
@@ -79,8 +79,8 @@ const data = {
           url: "/categories",
         },
         {
-          title: "Users",
-          url: "#",
+          title: "Customers",
+          url: "/customers",
         },
       ],
     },
@@ -127,6 +127,10 @@ const data = {
       url: "#",
       icon: BookOpen,
       items: [
+        {
+          title: "Product Advanced",
+          url: "/products-api",
+        },
         {
           title: "Introduction",
           url: "#",

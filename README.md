@@ -134,5 +134,29 @@ export default defineConfig([
       - form (input & Validation & toast)
       - Convert form modal (popup, sidebar)
       - API(POST)
-      - uesMutation hook (TanStack) 
+      - uesMutation hook (TanStack)
+16. Edit/Update Category list
+    - columns (provide data row to page)
+    - page(fn resign data, state store data)
+    - open modals
+    - send data to Form (pass data from state in page to form )
+    - API (PUT)
+    - uesMutation hook ( data refetch data)
+
+    <a name="my-custom-anchor-point">Advance option Add/Edite. </a><br>
+
+    ```
+    Your structure is a 3-layer component flow:
+
+    Page.  →   DrawerForm   → Form
+    (parent)   (middle)      (child)
+    ```
+
+17. Delete Category list
+    - columns (provide data row to page)
+    - page(fn resign data, state store data)
+    - Comfirm Modal
+    - API service (DELETE)
+    - uesMutation hook (set logic for create or update in form)
+
 # react-typescript-admin-template

@@ -1,4 +1,9 @@
-import { createCategory, getCategory } from "@/services/categoryService";
+import {
+  createCategory,
+  deleteCategory,
+  getCategory,
+  updateCategory,
+} from "@/services/categoryService";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 //userQuery using for GET method
@@ -21,6 +26,34 @@ export const useCreateCategory = () => {
     },
     onError: (err) => {
       console.error("Failed to create categories", err.message);
+    },
+  });
+};
+export const useUpdateCategory = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, request }: { id: number; request: any }) =>
+      updateCategory(id, request),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["categories"],
+      });
+    },
+    onError: (err) => {
+      console.error("Failed to create categories", err.message);
+    },
+  });
+};
+
+export const useDeleteCategory = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id }: { id: number }) => {
+      return deleteCategory(id);
+    },
+    //mutationFn: ({ id }: { id: number }) => deleteCategory(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["categories"] });
     },
   });
 };

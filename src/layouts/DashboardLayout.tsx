@@ -18,6 +18,7 @@ import {
 import { ThemeProvider } from "@/components/theme-provider";
 import { ModeToggle } from "@/components/mode-toggle";
 import Modeclick from "@/components/mode-click";
+import { Toaster } from "sonner";
 
 const DashboardLayout = () => {
   return (
@@ -62,6 +63,7 @@ const DashboardLayout = () => {
             </p>
 
             <Outlet />
+             <Toaster position="top-right" />
           </div>
         </SidebarInset>
       </SidebarProvider>

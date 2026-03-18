@@ -2,24 +2,14 @@
 
 import type { ColumnDef } from "@tanstack/react-table";
 import { ActionMenu } from "../users/action-tooltip";
+import { Badge } from "../ui/badge";
+import type { IProduct } from "../types/products";
+
 //import { Badge, CheckCircle, XCircle } from "lucide-react";
 
 // This type is used to define the shape of our data.
 // You can use a Zod schema here if you want.
-export type Product = {
-  id: number;
-  name: string;
-  description: string;
-  price: number;
-  qty: number;
-  categoryId: number;
-  isActive: boolean;
-  category: {
-    id: number;
-    name: string;
-  };
-  //images: string[]; // 👈 Array of image URLs
-};
+
 export const products = [
   {
     id: 4,
@@ -41,11 +31,17 @@ export const products = [
   },
 ];
 
-export const columns: ColumnDef<Product>[] = [
+export interface Props {
+  onEdit: (products: IProduct) => void;
+  onDelete: (products: IProduct) => void;
+}
+
+export const columns = ({ onEdit, onDelete }: Props): ColumnDef<IProduct>[] => [
   {
     accessorKey: "id",
     header: "ID",
   },
+  //Name
   {
     accessorKey: "name",
     header: "Name",
@@ -63,11 +59,13 @@ export const columns: ColumnDef<Product>[] = [
       );
     },
   },
+  //price
   {
     accessorKey: "price",
     header: "Price",
     cell: ({ row }) => <span>${row.original.price}</span>,
   },
+  // QTY
   {
     accessorKey: "qty",
     header: "QTY",
@@ -84,13 +82,32 @@ export const columns: ColumnDef<Product>[] = [
 
         // Option 2: Display as an icon (recommended for better UX)
         row.original.isActive ? (
-          <p style={{ color: "green", fontWeight: "700" }}>Active</p> // Replace with your icon component
+          <Badge
+            style={{
+              color: "white",
+              background: "green",
+              fontWeight: "400",
+              borderRadius: "5px",
+            }}
+          >
+            Active
+          </Badge> // Replace with your icon component
         ) : (
-          <span style={{ color: "red", fontWeight: "700" }}>InActive</span> // Replace with your icon component
+          <Badge
+            style={{
+              color: "black",
+              background: "oklch(96% .005 230)",
+              fontWeight: "400",
+              borderRadius: "5px",
+            }}
+          >
+            Inactive
+          </Badge> // Replace with your icon component
         )
       );
     },
   },
+  //category
   {
     accessorKey: "category",
     header: "Category",
@@ -119,15 +136,17 @@ export const columns: ColumnDef<Product>[] = [
   //       );
   //     },
   //   },
+
+  //Action
   {
     accessorKey: "actions",
     header: "Action",
     cell: ({ row }) => {
       return (
         <ActionMenu
-          onEdit={() => alert(`Edite field Name: ${row.original.name}`)}
+          onEdit={() => onEdit(row.original)}
           onView={() => alert(`View field Name: ${row.original.name}`)}
-          onDelete={() => alert(`Delete field Name: ${row.original.name}`)}
+          onDelete={() => onDelete(row.original)}
         />
       );
     },
