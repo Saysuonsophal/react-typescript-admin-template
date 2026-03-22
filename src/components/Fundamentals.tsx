@@ -1,7 +1,7 @@
-
 import { useState } from "react";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
+import { Link } from "react-router-dom";
 
 function Fundamentals() {
   //Variable Object
@@ -28,8 +28,11 @@ function Fundamentals() {
   const upadteNumber = [...event, ...odd];
   return (
     <>
+      <Link to={"/product"}>
+        <Button>Back to Product</Button>
+      </Link>
       <br />
-      <h2 className="text-lg font-bold mb-5">
+      <h2 className="text-lg font-bold mb-5 text-center">
         <strong>spread operation(...) </strong> <br />
         Use Case( copy object/array,Merge arrays/objects, and Pass array to
         function)

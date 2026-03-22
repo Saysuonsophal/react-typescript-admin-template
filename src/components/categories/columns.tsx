@@ -17,6 +17,10 @@ export const columns = ({
   onDeleteCatgory,
 }: Props): ColumnDef<ICategory>[] => [
   {
+    header: "No",
+    cell: ({ row }) => <div>{row.index + 1}</div>,
+  },
+  {
     accessorKey: "id",
     header: "ID",
   },

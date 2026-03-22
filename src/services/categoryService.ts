@@ -1,10 +1,14 @@
-export const getCategory = async () => {
-  const respon = await fetch("http://localhost:3000/api/v1/categories");
+export const getCategory = async (search?: string) => {
+  const respon = await fetch(
+    `http://localhost:3000/api/v1/categories?search=${search}`,
+  );
   if (!respon.ok) {
     throw new Error(` Failed to fetch categories`);
   }
-  //const data = await respon.json();
-  return respon.json();
+  const data = await respon.json();
+  console.log("fetch api:", data);
+
+  return data;
 };
 
 export const createCategory = async (request: any) => {

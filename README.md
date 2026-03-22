@@ -117,7 +117,7 @@ export default defineConfig([
     - Follow Quick Tanstack Query
     - Setup Fetch API again that related with TankStack query
 
-13. Search product Name
+13. Search product Name & button in Product API
     - catch value user input using useState (the every keystroke(input) will: Update searchInput)
     - second useState for getting full keyinput
     - Click function (assing value from first to second useState)
@@ -158,5 +158,12 @@ export default defineConfig([
     - Comfirm Modal
     - API service (DELETE)
     - uesMutation hook (set logic for create or update in form)
+18. Search Feature in Product (Debounce)
+    - setup Debounce library
+    - making Input and catch value using input `onChange` event & useState
+    - Apply debounce to delay the search request (using a debounce library)
+    - past debounce value to TanStack Query hook (`queryKey` + `queryFn`) by parameter + type
+    - Search parameter sent to backend API fetch
+    - Bakend route receive the search query and filters products accordingly.
 
 # react-typescript-admin-template

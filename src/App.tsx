@@ -14,6 +14,9 @@ import { CategoryPage } from "./pages/category-page";
 
 import { CustomerPage } from "./pages/customers";
 import { Product } from "./pages/Product";
+import { SignIn } from "./pages/sign-in";
+import { ForgotPassword } from "./pages/forgot-password";
+import { SignUp } from "./pages/sign-up";
 
 // Create a client
 const queryClient = new QueryClient();
@@ -24,6 +27,9 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <Routes>
+          <Route path="/sign-in" element={<SignIn />} />
+          <Route path="/sign-up" element={<SignUp />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
           {/* Main Layout page (Header & Footer) */}
           <Route element={<MainLayout />}>
             <Route path="/" element={<Home />}></Route>

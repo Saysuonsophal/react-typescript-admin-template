@@ -5,13 +5,14 @@ import { columns } from "@/components/products/columns-page";
 import { ProductFormPage } from "@/components/products/productform-page";
 import type { IProduct } from "@/components/types/products";
 import { Button } from "@/components/ui/button";
-//import { Input } from "@/components/ui/input";
+import { Input } from "@/components/ui/input";
 import { useDeleteProduct, useGetProduct } from "@/hooks/useCreateProduct";
-import { Plus } from "lucide-react";
+import { ChevronDown, Download, Plus, SlidersHorizontal } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
-//import { FiSearch } from "react-icons/fi";
-//import { PopoverBox } from "@/components/popoverbox";
+import { FiSearch } from "react-icons/fi";
+import { PopoverBox } from "@/components/popoverbox";
+import { useDebounce } from "use-debounce";
 
 export const Product = () => {
   const { mutate: DeleteProductMutation } = useDeleteProduct();
@@ -20,15 +21,12 @@ export const Product = () => {
   const [seletedProduct, setseletedProduct] = useState<IProduct | undefined>(
     undefined,
   );
-  const { data, isLoading, isError } = useGetProduct();
-  //const [inputsearch, setinputsearch] = useState("");
 
-  if (isLoading) {
-    return <div> loading Product...</div>;
-  }
-  if (isError) {
-    return <div>Error loading products</div>;
-  }
+  //search Debounce
+  const [searchInput, setSearchInput] = useState("");
+  const [value] = useDebounce(searchInput, 500);
+  console.log("search value", value);
+  const { data, isLoading, isError } = useGetProduct(value);
 
   const handleCencel = (open: boolean) => {
     setisOpenDrawer(open);
@@ -79,23 +77,37 @@ export const Product = () => {
         </div>
       </div>
 
-      {/* <div>
-        <div className="flex items-center">
-          <div className="relative w-full">
+      <div className="flex justify-between items-center gap-2">
+        <div className="flex items-center gap-2 flex-1">
+          <div className="relative max-w-sm flex-1">
             <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
             <Input
               type="text"
               placeholder="Search product"
-              value={inputsearch}
-              onChange={(e) => setinputsearch(e.target.value)}
-              className="pl-9"
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              className="pl-9 "
             />
           </div>
           <PopoverBox />
         </div>
-        <div>a</div>
-      </div> */}
-
+        <div className="flex gap-2">
+          <Button variant="outline" className="">
+            <SlidersHorizontal className="w-4 h-4" />
+            Columns
+            <ChevronDown />
+          </Button>
+          <Button variant="outline" className="">
+            <Download className="w-4 h-4" />
+            Export
+          </Button>
+        </div>
+      </div>
+      {/* ✅ ADD HERE */}
+      {isLoading && <div className="mt-2 text-sm">Loading Product...</div>}
+      {isError && (
+        <div className="mt-2 text-sm text-red-500">Error loading products</div>
+      )}
       <DataTable
         columns={columns({ onDelete: handleDelete, onEdit: handlEdit })}
         data={data?.data ?? []}

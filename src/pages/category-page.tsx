@@ -10,17 +10,23 @@ import { Plus } from "lucide-react";
 import { useState } from "react";
 import { ConfirmDelete } from "@/components/categories/confirmModal";
 import { toast } from "sonner";
+import { useDebounce } from "use-debounce";
 
 // import { data } from "react-router-dom";
 
 export const CategoryPage = () => {
-  const { data, isLoading } = useCategories();
-  console.log("Fetch Category", data); //log structure data provide from Backent
-
   const { mutate: deleteCategoryMutate } = useDeleteCategory();
   const [isOpen, setisOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [category, setCategory] = useState<ICategory | undefined>(undefined);
+
+  //search Category Name
+  const [searchName, setSeaerchName] = useState("");
+  const [value] = useDebounce(searchName, 500);
+  //console.log("search Name:", value);
+
+  const { data, isLoading } = useCategories(value);
+  console.log("Fetch Category", data); //log structure data provide from Backent
 
   // ACTION HANDLERS Edit/update
   const handleEdit = (category: ICategory) => {
@@ -58,13 +64,6 @@ export const CategoryPage = () => {
     setCategory(undefined);
   };
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center p-3">
-        <Spinner className="text-red-500 w-8 h-8" />
-      </div>
-    );
-  }
   return (
     <>
       <div className="flex flex-wrap justify-between  gap-2 py-6">
@@ -86,14 +85,19 @@ export const CategoryPage = () => {
         <div className="relative">
           <Input
             placeholder="Search Name..."
-            //value={searchInput} // Show key input search
-            //className="w-[200px]"
-            //onChange={(e) => setsearchInput(e.target.value)}
+            value={searchName} // Show key input search
+            className="w-[200px]"
+            onChange={(e) => setSeaerchName(e.target.value)}
           />
         </div>
 
         {/* <Button onClick={handlSearch}>Search</Button> */}
       </div>
+      {isLoading && (
+        <div className="flex items-center justify-center p-3">
+          <Spinner className="text-red-500 w-8 h-8" />
+        </div>
+      )}
       <DataTable
         columns={columns({
           onEditCategory: handleEdit,

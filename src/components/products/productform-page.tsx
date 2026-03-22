@@ -81,8 +81,9 @@ export const ProductFormPage = ({ open, onClose, products }: Props) => {
   const { data } = useCategories();
   const categories = data?.data ?? [];
 
-  const isPanding = isUpdating || isCreating; // combined for the button
+  console.log("category", categories);
 
+  const isPanding = isUpdating || isCreating; // combined for the button
 
   const form = useForm({
     defaultValues: {
@@ -196,7 +197,10 @@ export const ProductFormPage = ({ open, onClose, products }: Props) => {
                     />
 
                     {isInvalid && (
-                      <FieldError errors={field.state.meta.errors} />
+                      <FieldError
+                        errors={field.state.meta.errors}
+                        className="text-[12px]"
+                      />
                     )}
                   </Field>
                 );
@@ -229,7 +233,10 @@ export const ProductFormPage = ({ open, onClose, products }: Props) => {
                       />
 
                       {isInvalid && (
-                        <FieldError errors={field.state.meta.errors} />
+                        <FieldError
+                          errors={field.state.meta.errors}
+                          className="text-[12px]"
+                        />
                       )}
                     </Field>
                   );
@@ -263,7 +270,10 @@ export const ProductFormPage = ({ open, onClose, products }: Props) => {
                       />
 
                       {isInvalid && (
-                        <FieldError errors={field.state.meta.errors} />
+                        <FieldError
+                          errors={field.state.meta.errors}
+                          className="text-[12px]"
+                        />
                       )}
                     </Field>
                   );
@@ -281,9 +291,6 @@ export const ProductFormPage = ({ open, onClose, products }: Props) => {
                   <Field data-invalid={isInvalid}>
                     <FieldContent>
                       <FieldLabel>Category</FieldLabel>
-                      {isInvalid && (
-                        <FieldError errors={field.state.meta.errors} />
-                      )}
                     </FieldContent>
                     <Select
                       //solution 1 (Define to React to know SelectVlue pleaseholder)
@@ -320,6 +327,12 @@ export const ProductFormPage = ({ open, onClose, products }: Props) => {
                         ))}
                       </SelectContent>
                     </Select>
+                    {isInvalid && (
+                      <FieldError
+                        errors={field.state.meta.errors}
+                        className="text-[12px]"
+                      />
+                    )}
                   </Field>
                 );
               }}
@@ -434,14 +447,14 @@ export const ProductFormPage = ({ open, onClose, products }: Props) => {
                             onChange={(e) => field.handleChange(e.target.value)}
                             onBlur={field.handleBlur}
                           />
-                          {isInvalid && (
-                            <p className="text-xs text-red-500">
-                              {field.state.meta.errors[0]?.message}
-                            </p>
-                          )}
                         </div>
                       </div>
-                      {/* New Advanceed Custom color picker */}
+                      {/* Validation message */}
+                      {isInvalid && (
+                        <p className="text-xs text-red-500">
+                          {field.state.meta.errors[0]?.message}
+                        </p>
+                      )}
                     </FieldContent>
                   </Field>
                 );

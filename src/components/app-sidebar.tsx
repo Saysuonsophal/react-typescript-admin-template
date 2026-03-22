@@ -12,6 +12,7 @@ import {
   PieChart,
   Settings2,
   SquareTerminal,
+  ShieldCheck,
 } from "lucide-react";
 
 import { NavMain } from "@/components/nav-main";
@@ -62,11 +63,11 @@ const data = {
           url: "/users",
         },
         {
-          title: "Dashboard",
-          url: "#",
+          title: "Basic",
+          url: "/basic",
         },
         {
-          title: "Data Fetching",
+          title: "Fake Data Fetching",
           url: "/products",
         },
         {
@@ -81,6 +82,25 @@ const data = {
         {
           title: "Customers",
           url: "/customers",
+        },
+      ],
+    },
+    {
+      title: "Auth",
+      url: "#",
+      icon: ShieldCheck,
+      items: [
+        {
+          title: "Sign In",
+          url: "/sign-in",
+        },
+        {
+          title: "Sign Up",
+          url: "/sign-up",
+        },
+        {
+          title: "Forget Password",
+          url: "/forgot-password",
         },
       ],
     },

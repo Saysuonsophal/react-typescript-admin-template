@@ -6,14 +6,13 @@ import {
   updateProduct,
 } from "@/services/productService";
 import { toast } from "sonner";
-import type {
-  productSchema,
-} from "@/schemas/product.schema";
+import type { productSchema } from "@/schemas/product.schema";
 
-export function useGetProduct() {
+export function useGetProduct(search?: string) {
   return useQuery({
-    queryKey: ["products"],
-    queryFn: getProduct,
+    queryKey: ["products", search],
+    queryFn: () => getProduct(search),
+    staleTime: 1000 * 30,
   });
 }
 
