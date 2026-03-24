@@ -8,11 +8,31 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useDeleteProduct, useGetProduct } from "@/hooks/useCreateProduct";
 import { ChevronDown, Download, Plus, SlidersHorizontal } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { FiSearch } from "react-icons/fi";
 import { PopoverBox } from "@/components/popoverbox";
 import { useDebounce } from "use-debounce";
+
+// pagination import
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
+import { Field, FieldLabel } from "@/components/ui/field";
+import {
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  Select,
+} from "@/components/ui/select";
 
 export const Product = () => {
   const { mutate: DeleteProductMutation } = useDeleteProduct();
@@ -25,8 +45,42 @@ export const Product = () => {
   //search Debounce
   const [searchInput, setSearchInput] = useState("");
   const [value] = useDebounce(searchInput, 500);
-  console.log("search value", value);
-  const { data, isLoading, isError } = useGetProduct(value);
+  //console.log("search value", value);
+
+  //default pagination
+  const [page, setPage] = useState(1);
+  console.log("Curren Page:", page);
+  // Reset to page 1 whenever the debounced search value changes
+  // useEffect(() => {
+  //   setPage(1);
+  // }, [value]);
+  const [limit, setLimit] = useState(10);
+  console.log("limit:", limit);
+
+  const { data, isLoading, isError } = useGetProduct(value, page, limit);
+
+  // Data fetching
+  const pagination = data?.pagination;
+  console.log("Pagination", pagination);
+
+  const startItem = (page - 1) * limit + 1;
+
+  const { totalItems } = pagination ?? {};
+  const currentPage = pagination?.currentPage ?? 1;
+  const endItem = Math.min(currentPage * limit, totalItems);
+  const totalPage = pagination?.totalPages ?? 1;
+
+  //console.log("Total Page:", totalPage);
+  //console.log("currentPage", currentPage);
+  //console.log("Total Items:", totalItems);
+  //console.log("startItem", startItem);
+  //console.log("End item", endItem);
+
+  const handleNext = () => {
+    if (pagination?.nextPage) {
+      setPage(pagination.nextPage);
+    }
+  };
 
   const handleCencel = (open: boolean) => {
     setisOpenDrawer(open);
@@ -108,15 +162,116 @@ export const Product = () => {
       {isError && (
         <div className="mt-2 text-sm text-red-500">Error loading products</div>
       )}
+
+      {/* Table */}
       <DataTable
         columns={columns({ onDelete: handleDelete, onEdit: handlEdit })}
         data={data?.data ?? []}
       />
+
+      <div className="flex justify-between w-full items-center">
+        <Field orientation="horizontal" className="w-fit">
+          <FieldLabel htmlFor="select-rows-per-page">Rows</FieldLabel>
+          <Select
+            //defaultValue="10"
+            value={String(limit)}
+            onValueChange={(value) => {
+              setLimit(Number(value));
+              setPage(1);
+            }}
+          >
+            <SelectTrigger className="w-20" id="select-rows-per-page">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent align="start">
+              <SelectGroup>
+                <SelectItem value="5">5</SelectItem>
+                <SelectItem value="10">10</SelectItem>
+                <SelectItem value="25">25</SelectItem>
+                <SelectItem value="50">50</SelectItem>
+                <SelectItem value="75">75</SelectItem>
+                <SelectItem value="100">100</SelectItem>
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+        </Field>
+
+        {/* Left side: results info (show/hide Logic) */}
+        {pagination && (
+          <div className="text-sm text-muted-foreground">
+            Showing {startItem}-{endItem} of {totalItems} results
+            {/* Showing 1-10 of {pagination?.totalItems} results */}
+          </div>
+        )}
+
+        <div className="flex items-center gap-2">
+          {/* Pagination Table */}
+          <Pagination className="flex justify-end">
+            <PaginationContent>
+              {/* Previous Button */}
+              <PaginationItem className="border rounded-md">
+                <PaginationPrevious
+                  href="#"
+                  onClick={() =>
+                    pagination?.prevPage && setPage(pagination?.prevPage)
+                  }
+                  className={
+                    !pagination?.prevPage
+                      ? "pointer-events-none opacity-50 cursor-not-allowed"
+                      : "cursor-pointer"
+                  }
+                />
+              </PaginationItem>
+
+              {/* Page Numbers */}
+
+              <PaginationItem>
+                {[...Array(totalPage)].map((_, i) => {
+                  const listPage = i + 1;
+                  return (
+                    <PaginationLink
+                      key={i}
+                      isActive={listPage == currentPage}
+                      onClick={() => setPage(listPage)}
+                      href="#"
+                    >
+                      {listPage}
+                    </PaginationLink>
+                  );
+                })}
+              </PaginationItem>
+
+              {/* <PaginationItem><PaginationEllipsis /></PaginationItem> */}
+
+              {/* Next */}
+              <PaginationItem className="border rounded-md">
+                <PaginationNext
+                  href="#"
+                  aria-disabled={!pagination?.nextPage}
+                  // onClick={() => {
+                  //   if (pagination?.nextPage) setPage(pagination?.nextPage);
+                  // }}
+                  onClick={handleNext}
+                  className={
+                    !pagination?.nextPage
+                      ? "pointer-events-none opacity-50 cursor-not-allowed"
+                      : "cursor-pointer"
+                  }
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
+        </div>
+      </div>
+
+      {/* Edit Drawer */}
       <ProductFormPage
         open={isOpenDrawer}
         onClose={handleCencel}
         products={seletedProduct}
       />
+
+      {/* Delete Dialog */}
       <ConfirmDelete
         isOpen={isDelete}
         setIsOpen={handleCloseDeleteModal}

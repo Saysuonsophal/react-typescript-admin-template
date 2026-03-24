@@ -165,5 +165,17 @@ export default defineConfig([
     - past debounce value to TanStack Query hook (`queryKey` + `queryFn`) by parameter + type
     - Search parameter sent to backend API fetch
     - Bakend route receive the search query and filters products accordingly.
+19. Pagintion Product
+    - Create UI pagination component
+    - Product page make
+      - Set two useState (page & limite) in product for set default value assign to backend
+      - Call backend object of pagination, this's inside (next,prev) pagination
+      - Make selection to assing pagination (limit) data
+        - Design selection UI
+        - set useState to onValueChange and set limit provide to backend
+      - total(Pages, items), currentPage
+    - assing useState to Hook by parameter
+    - past pagination (page & limite) to TanStack Query hook (`queryKey` + `queryFn`) by parameter + type
+    - assign pagination(page & limite) parameter sent to backend API fetch
 
 # react-typescript-admin-template

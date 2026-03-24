@@ -8,10 +8,10 @@ import {
 import { toast } from "sonner";
 import type { productSchema } from "@/schemas/product.schema";
 
-export function useGetProduct(search?: string) {
+export function useGetProduct(search?: string, page?: number, limit?: number) {
   return useQuery({
-    queryKey: ["products", search],
-    queryFn: () => getProduct(search),
+    queryKey: ["products", search, page, limit],
+    queryFn: () => getProduct(search, page, limit),
     staleTime: 1000 * 30,
   });
 }

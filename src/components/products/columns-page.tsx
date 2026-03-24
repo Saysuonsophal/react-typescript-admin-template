@@ -7,6 +7,7 @@ import { ActionMenu } from "../users/action-tooltip";
 //import { Checkbox } from "../ui/checkbox";
 //import { CloudSnow } from "lucide-react";
 import { format } from "date-fns";
+import { Slice } from "lucide-react";
 
 export interface Props {
   onEdit: (product: IProduct) => void;
@@ -41,11 +42,11 @@ export const columns = ({ onEdit, onDelete }: Props): ColumnDef<IProduct>[] => [
       //   </div>
       // );
 
-      <div>
+      <div className="w-[30rem]">
         {/* <image src={row.original.image} className="w-8 h-8 rounded" /> */}
         <div>
           <p className="font-medium">{row.original.name}</p>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-muted-foreground truncate">
             {row.original.description}
           </p>
         </div>
@@ -55,6 +56,7 @@ export const columns = ({ onEdit, onDelete }: Props): ColumnDef<IProduct>[] => [
   {
     accessorKey: "categoryId",
     header: "Category",
+
     cell: ({ row }) => {
       return <Badge variant="outline">{row.original.category.name}</Badge>;
     },

@@ -1,9 +1,13 @@
 //1.(POST product)Clean API File (Production Correct)
 import type { productSchema } from "@/schemas/product.schema";
 
-export const getProduct = async (search?: string) => {
+export const getProduct = async (
+  search?: string,
+  page: number = 1,
+  limit: number = 10,
+) => {
   const respon = await fetch(
-    `http://localhost:3000/api/v1/products?search=${search}`,
+    `http://localhost:3000/api/v1/products?search=${search}&page=${page}&limit=${limit}`,
   );
   if (!respon.ok) {
     throw new Error("getting Data Error");
