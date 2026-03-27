@@ -170,12 +170,26 @@ export default defineConfig([
     - Product page make
       - Set two useState (page & limite) in product for set default value assign to backend
       - Call backend object of pagination, this's inside (next,prev) pagination
-      - Make selection to assing pagination (limit) data
+      - Make row per page to assing pagination (limit) data
         - Design selection UI
         - set useState to onValueChange and set limit provide to backend
-      - total(Pages, items), currentPage
+      - Result count (start, end, total Items)
+      - Page Number pagination (currentPage, totalPage),
     - assing useState to Hook by parameter
     - past pagination (page & limite) to TanStack Query hook (`queryKey` + `queryFn`) by parameter + type
     - assign pagination(page & limite) parameter sent to backend API fetch
+20. Sign In + Auth (JWT) from Backend
+    - Make Form Sign in/up
+    - Set up validation schema using Zod.
+    - Use TanStack useForm with: defaultValues, validators, onSubmit handler
+    - Fetch API (POST) to call Backend (auth service)
+    - Use useMutation hook from TanStack Query for API requests.
+    - Passing the mutation hook and parameters to the form component.
+    - Check respon by log in API, Hook, Form. the backend must respone(accessToken, message)
+    - Implement accessToken storage in LocalStorage: (Set, Get, Remove)
+    - assign parameter to LocalStorage(Set) inside onSuccess (res?.accessToken)
+    - After login, redirect the user to the dashboard or desired page.
+    - Setup protect page if user without takon(LogIn)
+      - tokan is get from localStorage
 
 # react-typescript-admin-template

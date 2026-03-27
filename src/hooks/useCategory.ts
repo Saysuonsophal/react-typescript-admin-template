@@ -7,11 +7,12 @@ import {
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 //userQuery using for GET method
-export const useCategories = (search?: string) => {
+export const useCategories = (search?: string, page?: number, limit?: number) => {
   return useQuery({
-    queryKey: ["categories", search], //key catch
-    queryFn: () => getCategory(search), // API
+    queryKey: ["categories", search, page, limit], //key catch
+    queryFn: () => getCategory(search, page, limit), // API
     staleTime: 100 * 60 * 10,
+    
   });
 };
 

@@ -14,7 +14,7 @@ export const columns: ColumnDef<Product>[] = [
     header: "Product Name",
 
     cell: ({ row }) => {
-      return <div>{row.original.title}</div>;
+      return <div className="w-[15rem]">{row.original.title}</div>;
     },
   },
   {

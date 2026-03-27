@@ -28,7 +28,7 @@ function Fundamentals() {
   const upadteNumber = [...event, ...odd];
   return (
     <>
-      <Link to={"/product"}>
+      <Link to={"/admin/product"}>
         <Button>Back to Product</Button>
       </Link>
       <br />

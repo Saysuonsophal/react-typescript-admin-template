@@ -68,20 +68,20 @@ const data = {
         },
         {
           title: "Fake Data Fetching",
-          url: "/products",
+          url: "/admin/products",
         },
         {
           title: "Product",
-          url: "/product",
+          url: "/admin/product",
         },
 
         {
           title: "Category",
-          url: "/categories",
+          url: "/admin/categories",
         },
         {
           title: "Customers",
-          url: "/customers",
+          url: "/admin/customers",
         },
       ],
     },
@@ -200,7 +200,7 @@ const data = {
   projects: [
     {
       name: "Dashboard",
-      url: "#",
+      url: "/dashboard",
       icon: PieChart,
     },
     {

@@ -26,8 +26,8 @@ const DashboardLayout = () => {
       <SidebarProvider>
         <AppSidebar />
         <SidebarInset>
-          <header className="flex h-16 shrink-0  mt-1 items-center justify-between gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
-            {/* LEFT SIDE */}
+          <header className="flex h-15 shrink-0 backdrop-blur-lg sticky top-0 z-50 items-center justify-between gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-15">
+            {/* LEFT SIDE oklch(92.9% .013 255.508)*/}
             <div className="flex items-center gap-2 px-4">
               <SidebarTrigger className="-ml-1" />
               <Separator
@@ -63,7 +63,7 @@ const DashboardLayout = () => {
             </p>
 
             <Outlet />
-             <Toaster position="top-right" />
+            <Toaster position="top-right" />
           </div>
         </SidebarInset>
       </SidebarProvider>

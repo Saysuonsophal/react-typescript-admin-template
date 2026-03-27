@@ -137,7 +137,7 @@ export const ProductFormPage = ({ open, onClose, products }: Props) => {
       }
     },
   });
-  console.log("Form input", form);
+  //console.log("Form input", form);
   useEffect(() => {
     if (open) {
       form.reset(); // ← resets to defaultValues, no need to repeat fields

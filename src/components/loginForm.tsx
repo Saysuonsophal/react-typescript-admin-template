@@ -9,7 +9,9 @@ import {
 } from "@/components/ui/card";
 import {
   Field,
+  FieldContent,
   FieldDescription,
+  FieldError,
   FieldGroup,
   FieldLabel,
   FieldSeparator,
@@ -17,12 +19,54 @@ import {
 import { Input } from "@/components/ui/input";
 import { Eye, EyeOff, LogIn } from "lucide-react";
 import { useState } from "react";
+import { useForm } from "@tanstack/react-form";
+import { z } from "zod";
+import { useAuthLogin } from "@/hooks/useAuth";
+import { setAccessToken } from "@/utils/tokenStorage";
+import { Spinner } from "./ui/spinner";
+
+import { useNavigate } from "react-router-dom";
+
+const loginSchema = z.object({
+  email: z.string().min(1, "Email is required"),
+  password: z.string().min(1, "password is required"),
+});
 
 export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
+  const navigate = useNavigate();
   const [show, setShow] = useState(false);
+  const [error, setError] = useState("");
+  const { mutate: signInMutation, isPending } = useAuthLogin();
+  const form = useForm({
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+    validators: {
+      onSubmit: loginSchema,
+    },
+    onSubmit: async ({ value }) => {
+      setError("");
+      signInMutation(
+        { request: value },
+        {
+          onSuccess: (res) => {
+            //console.log("Auth Login Form:", res);
+            if (res?.accessToken) {
+              setAccessToken(res?.accessToken);
+              navigate("/dashboard");
+            } else {
+              setError(res?.message);
+            }
+          },
+        },
+      );
+    },
+  });
+
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
@@ -33,54 +77,116 @@ export function LoginForm({
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form>
+          <form
+            id="login-form"
+            onSubmit={(e) => {
+              e.preventDefault();
+              form.handleSubmit();
+            }}
+          >
             <FieldGroup>
               <div className="grid gap-3">
                 {/* Email */}
-                <Field>
-                  <FieldLabel htmlFor="email">Email</FieldLabel>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="m@example.com"
-                    required
-                  />
-                </Field>
+                <form.Field name="email">
+                  {(field) => {
+                    //Validation check
+                    const isInvalid =
+                      field.state.meta.isTouched && !field.state.meta.isValid;
+                    return (
+                      <Field data-invalit={isInvalid}>
+                        <FieldLabel htmlFor={field.name}>
+                          Email
+                          <span style={{ color: "red", fontSize: "14px" }}>
+                            *
+                          </span>
+                        </FieldLabel>
+                        <Input
+                          name={field.name}
+                          id={field.name}
+                          type="email"
+                          value={field.state.value}
+                          onBlur={field.handleBlur}
+                          onChange={(e) => {
+                            field.handleChange(e.target.value);
+                            setError("");
+                          }}
+                          aria-invalid={isInvalid}
+                          placeholder="name@example.com"
+                        />
+                        {/* Error message */}
+                        <FieldContent>
+                          {isInvalid && (
+                            <FieldError errors={field.state.meta.errors} />
+                          )}
+                        </FieldContent>
+                      </Field>
+                    );
+                  }}
+                </form.Field>
+
                 {/* Password */}
-                <Field>
-                  <div className="flex items-center">
-                    <FieldLabel htmlFor="password">Password</FieldLabel>
-                    <a
-                      href="/forgot-password"
-                      className="ml-auto text-sm underline-offset-4 hover:underline"
-                    >
-                      Forgot your password?
-                    </a>
-                  </div>
-                  <div className="relative w-full ">
-                    <Input
-                      type={show ? "text" : "password"}
-                      placeholder="********"
-                      className="pr-10 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShow(!show)}
-                      className="absolute top-1/2 -translate-y-1/2 right-1 p-1.5 mr-0.5 text-gray-400 active:scale-95 rounded-md text-muted-foreground hover:text-foreground"
-                    >
-                      {show ? (
-                        <EyeOff className="w-5 h-5" />
-                      ) : (
-                        <Eye className="w-5 h-5" />
-                      )}
-                    </button>
-                  </div>
-                </Field>
+
+                <form.Field name="password">
+                  {(field) => {
+                    const isInvalid =
+                      field.state.meta.isTouched && !field.state.meta.isValid;
+                    return (
+                      <Field data-invalid={isInvalid}>
+                        <div className="flex items-center">
+                          <FieldLabel htmlFor={field.name}>Password</FieldLabel>
+                          <a
+                            href="/forgot-password"
+                            className="ml-auto text-sm underline-offset-4 hover:underline"
+                          >
+                            Forgot your password?
+                          </a>
+                        </div>
+                        <div className="relative w-full ">
+                          <Input
+                            id={field.name}
+                            name={field.name}
+                            value={field.state.value}
+                            onChange={(e) => field.handleChange(e.target.value)}
+                            onBlur={field.handleBlur}
+                            aria-invalid={isInvalid}
+                            type={show ? "text" : "password"}
+                            placeholder="********"
+                            className="pr-10 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShow(!show)}
+                            className="absolute top-1/2 -translate-y-1/2 right-1 p-1.5 mr-0.5 text-gray-400 active:scale-95 rounded-md text-muted-foreground hover:text-foreground"
+                          >
+                            {show ? (
+                              <EyeOff className="w-5 h-5" />
+                            ) : (
+                              <Eye className="w-5 h-5" />
+                            )}
+                          </button>
+                        </div>
+                        <FieldContent>
+                          {/* {isInvalid && (
+                            <FieldError errors={field.state.meta.errors} />
+                          )} */}
+                          {error ? (
+                            <FieldError>{error}</FieldError>
+                          ) : (
+                            isInvalid && (
+                              <FieldError errors={field.state.meta.errors} />
+                            )
+                          )}
+                        </FieldContent>
+                      </Field>
+                    );
+                  }}
+                </form.Field>
+
                 {/* Submit */}
                 <Field className="mt-4">
-                  <Button type="submit">
-                    <LogIn />
-                    Sign In
+                  <Button type="submit" form="login-form" disabled={isPending}>
+                    {isPending ? <Spinner className="w-4 h-4" /> : <LogIn />}
+                    {isPending ? "Signing in..." : "Sign In"}
                   </Button>
                 </Field>
               </div>

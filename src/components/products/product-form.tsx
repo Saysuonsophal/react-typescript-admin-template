@@ -196,6 +196,7 @@ export const ProductForm = forwardRef<FormRef, ProductFormProps>(
           {/* Name */}
           <form.Field name="name">
             {(field) => {
+              //Validation check
               const isInvalid =
                 field.state.meta.isTouched && !field.state.meta.isValid;
               return (
@@ -210,6 +211,7 @@ export const ProductForm = forwardRef<FormRef, ProductFormProps>(
                       aria-invalid={isInvalid}
                       placeholder="Enter a title "
                     />
+                    {/* Error message */}
                   </FieldContent>
                   {isInvalid && <FieldError errors={field.state.meta.errors} />}
                 </Field>

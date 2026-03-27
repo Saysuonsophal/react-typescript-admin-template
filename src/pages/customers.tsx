@@ -3,14 +3,19 @@ import { DataTable } from "@/components/data-table";
 import { Button } from "@/components/ui/button";
 
 import { useCustomer } from "@/hooks/useCustomer";
+import { getAccessToken } from "@/utils/tokenStorage";
+import { useNavigate } from "react-router-dom";
 
 export const CustomerPage = () => {
+  const navigate = useNavigate();
   const { data, isLoading } = useCustomer();
   console.log("customer fetch Data:", data);
 
   if (isLoading) {
     return <div className="p-4 text-center">Loading customers...</div>;
   }
+  const token = getAccessToken();
+  if (!token) navigate("/sign-in");
   return (
     <div>
       <div className="flex flex-wrap justify-between gap-2 py-6">

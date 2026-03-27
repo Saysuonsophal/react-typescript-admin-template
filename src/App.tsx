@@ -13,10 +13,11 @@ import { ColorPage } from "./pages/colorpage";
 import { CategoryPage } from "./pages/category-page";
 
 import { CustomerPage } from "./pages/customers";
-import { Product } from "./pages/Product";
 import { SignIn } from "./pages/sign-in";
 import { ForgotPassword } from "./pages/forgot-password";
 import { SignUp } from "./pages/sign-up";
+import { Product } from "./pages/product";
+import { Dashboard } from "./pages/Dashboard";
 
 // Create a client
 const queryClient = new QueryClient();
@@ -39,12 +40,13 @@ function App() {
 
           {/* Dashboard Layout  */}
           <Route element={<DashboardLayout />}>
-            <Route path="/products" element={<ProductsPage />}></Route>
-            <Route path="/products-api" element={<ProductAPI />}></Route>
+            <Route path="/dashboard" element={<Dashboard />}></Route>
+            <Route path="/admin/products" element={<ProductsPage />}></Route>
+            <Route path="/admin/products-api" element={<ProductAPI />}></Route>
             <Route path="/colors" element={<ColorPage />}></Route>
-            <Route path="/categories" element={<CategoryPage />}></Route>
-            <Route path="/customers" element={<CustomerPage />}></Route>
-            <Route path="/product" element={<Product />}></Route>
+            <Route path="/admin/categories" element={<CategoryPage />}></Route>
+            <Route path="/admin/customers" element={<CustomerPage />}></Route>
+            <Route path="/admin/product" element={<Product />}></Route>
           </Route>
         </Routes>
       </BrowserRouter>

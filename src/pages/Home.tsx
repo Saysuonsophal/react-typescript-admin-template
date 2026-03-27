@@ -14,7 +14,7 @@ const Home = () => {
       <Link to={"/basic"}>
         <Button>Basic</Button>
       </Link>
-      <Link to={"/products"}>
+      <Link to={"/dashboard"}>
         <Button>Dashboard Products</Button>
       </Link>
     </div>

@@ -12,6 +12,25 @@ import { ConfirmDelete } from "@/components/categories/confirmModal";
 import { toast } from "sonner";
 import { useDebounce } from "use-debounce";
 
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
+
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Field, FieldLabel } from "@/components/ui/field";
+
 // import { data } from "react-router-dom";
 
 export const CategoryPage = () => {
@@ -25,8 +44,27 @@ export const CategoryPage = () => {
   const [value] = useDebounce(searchName, 500);
   //console.log("search Name:", value);
 
-  const { data, isLoading } = useCategories(value);
-  console.log("Fetch Category", data); //log structure data provide from Backent
+  // pagination
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(5);
+
+  const { data, isLoading } = useCategories(value, page, limit);
+  //console.log("Fetch Category", data); //log structure data provide from Backent
+  const pagination = data?.pagination;
+
+  console.log("pagination", pagination);
+
+  const {
+    nextPage = null,
+    prevPage = null,
+    totalPage = 0,
+    currentPage,
+    totalItem,
+  } = pagination ?? {};
+  const startItem = (currentPage - 1) * limit + 1;
+  const endItem = Math.min(currentPage * limit, totalItem);
+
+  console.log("Totla Page", totalPage);
 
   // ACTION HANDLERS Edit/update
   const handleEdit = (category: ICategory) => {
@@ -102,12 +140,101 @@ export const CategoryPage = () => {
         columns={columns({
           onEditCategory: handleEdit,
           onDeleteCatgory: handleDelete,
+          rowStartIndex: startItem,
         })}
         data={data?.data ?? []}
       />
+
+      <div className="flex items-center justify-between">
+        {/* Rows per page */}
+        <Field orientation="horizontal" className="w-fit whitespace-nowrap">
+          <FieldLabel htmlFor="select-rows-per-page">Rows per page</FieldLabel>
+          <Select
+            value={String(limit)}
+            onValueChange={(value) => {
+              setLimit(Number(value));
+              setPage(1);
+            }}
+          >
+            <SelectTrigger className="w-20" id="select-rows-per-page">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent align="start">
+              <SelectGroup>
+                <SelectItem value="5">5</SelectItem>
+                <SelectItem value="10">10</SelectItem>
+                <SelectItem value="25">25</SelectItem>
+                <SelectItem value="50">50</SelectItem>
+                <SelectItem value="100">100</SelectItem>
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+        </Field>
+
+        <div className="flex items-center ">
+          {/* Pagination result */}
+          {pagination && (
+            <div className="flex items-center whitespace-nowrap mr-4 text-sm text-muted-foreground ">
+              Showing {startItem}-{endItem} of {totalItem} results
+              {/* Showing 1-10 of {pagination?.totalItems} results */}
+            </div>
+          )}
+
+          {/* Pagination */}
+          <Pagination className="flex items-end justify-end w-full">
+            <PaginationContent>
+              <PaginationItem className="border rounded-md">
+                <PaginationPrevious
+                  href="#"
+                  onClick={() => prevPage && setPage(prevPage)}
+                  className={
+                    !prevPage
+                      ? "pointer-events-none cursor-not-allowed opacity-50"
+                      : "cursor-pointer"
+                  }
+                />
+              </PaginationItem>
+              <PaginationItem>
+                {Array.from({ length: totalPage }).map((_, i) => {
+                  const pageNum = i + 1;
+                  return (
+                    <PaginationLink
+                      key={pageNum}
+                      isActive={pageNum === currentPage}
+                      onClick={() =>
+                        pageNum !== currentPage && setPage(pageNum)
+                      }
+                      className={
+                        pageNum === currentPage
+                          ? "bg-black text-white hover:bg-black hover:text-white "
+                          : "cursor-pointer"
+                      }
+                    >
+                      {pageNum}
+                    </PaginationLink>
+                  );
+                })}
+              </PaginationItem>
+
+              <PaginationItem className="border rounded-md">
+                <PaginationNext
+                  href="#"
+                  onClick={() => nextPage && setPage(nextPage)}
+                  className={
+                    !nextPage
+                      ? "pointer-events-none cursor-not-allowed opacity-50"
+                      : "cursor-pointer"
+                  }
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
+        </div>
+      </div>
       <div className="flex gap-2 ">
         <CategoryForm open={isOpen} setOpen={handleClose} category={category} />
       </div>
+
       <ConfirmDelete<ICategory>
         isOpen={isDeleteOpen}
         setIsOpen={setIsDeleteOpen}

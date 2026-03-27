@@ -11,10 +11,13 @@ import { Plus } from "lucide-react";
 import { ConfirmDelete } from "@/components/categories/confirmModal";
 import { useDeleteProduct } from "@/hooks/useCreateProduct";
 import { toast } from "sonner";
+import { getAccessToken } from "@/utils/tokenStorage";
+import { useNavigate } from "react-router-dom";
 
 //import { useEffect, useState } from "react";
 
 export const ProductAPI = () => {
+  const navigate = useNavigate();
   const [searchInput, setsearchInput] = useState("");
   const [searchTerm, setsearchTerm] = useState("");
   const [drawerOpen, setdrawerOpen] = useState(false);
@@ -85,6 +88,12 @@ export const ProductAPI = () => {
     );
     console.log("payload Delete:", product);
   };
+
+  //Validation token without sign in
+  const token = getAccessToken();
+  if (!token) {
+    navigate("/sign-in");
+  }
 
   // 🟢 Step 3: Show data when ready
   return (

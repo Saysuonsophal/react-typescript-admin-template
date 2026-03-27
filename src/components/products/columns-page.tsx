@@ -7,14 +7,20 @@ import { ActionMenu } from "../users/action-tooltip";
 //import { Checkbox } from "../ui/checkbox";
 //import { CloudSnow } from "lucide-react";
 import { format } from "date-fns";
-import { Slice } from "lucide-react";
+//import { Slice } from "lucide-react";
+import boxImage from "@/assets/box.png";
 
 export interface Props {
   onEdit: (product: IProduct) => void;
   onDelete: (product: IProduct) => void;
+  rowStartIndex: number;
 }
 
-export const columns = ({ onEdit, onDelete }: Props): ColumnDef<IProduct>[] => [
+export const columns = ({
+  onEdit,
+  onDelete,
+  rowStartIndex,
+}: Props): ColumnDef<IProduct>[] => [
   // ✅ KEEP — checkbox
   // {
   //   id: "select",
@@ -23,30 +29,25 @@ export const columns = ({ onEdit, onDelete }: Props): ColumnDef<IProduct>[] => [
   // },
   {
     header: "No",
-    cell: ({ row }) => <div>{row.index + 1}</div>,
+    cell: ({ row }) => <div>{rowStartIndex + row.index}</div>,
   },
   {
     accessorKey: "id",
     header: "ID",
   },
-  // ✅ KEEP — product name + description + image
+  // product name + description + image
   {
     accessorKey: "name",
     //header: ({ column }) => <DataTableColumnHeader column={column} title="Product" />,
     header: "Name",
     cell: ({ row }) => (
-      // return (
-      //   <div className="flex items-center flex-row max-w-12">
-      //     <div className="bg-red-200">image</div>
-      //     <div className="bg-green-400">constent</div>
-      //   </div>
-      // );
-
-      <div className="w-[30rem]">
-        {/* <image src={row.original.image} className="w-8 h-8 rounded" /> */}
-        <div>
+      <div className="w-[28rem] flex gap-2 items-center ">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-sm bg-muted">
+          <img src={boxImage} className="w-5 h-5 rounded" />
+        </div>
+        <div className="min-w-0">
           <p className="font-medium">{row.original.name}</p>
-          <p className="text-sm text-muted-foreground truncate">
+          <p className="text-sm text-muted-foreground truncate whitespace-nowrap">
             {row.original.description}
           </p>
         </div>
@@ -72,7 +73,10 @@ export const columns = ({ onEdit, onDelete }: Props): ColumnDef<IProduct>[] => [
   },
   {
     accessorKey: "qty",
-    header: "Qty",
+    header: "Stock",
+    cell: ({ row }) => (
+      <div className="w-[4vw] flex justify-center">{row.original.qty}</div>
+    ),
   },
   {
     accessorKey: "isActive",

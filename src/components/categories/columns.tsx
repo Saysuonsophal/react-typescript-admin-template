@@ -10,15 +10,17 @@ import { format } from "date-fns";
 export type Props = {
   onEditCategory: (category: ICategory) => void;
   onDeleteCatgory: (category: ICategory) => void;
+  rowStartIndex: number;
 };
 
 export const columns = ({
   onEditCategory,
   onDeleteCatgory,
+  rowStartIndex,
 }: Props): ColumnDef<ICategory>[] => [
   {
     header: "No",
-    cell: ({ row }) => <div>{row.index + 1}</div>,
+    cell: ({ row }) => <div>{rowStartIndex + row.index}</div>,
   },
   {
     accessorKey: "id",

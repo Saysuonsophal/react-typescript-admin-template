@@ -2,12 +2,14 @@ import { Button } from "@/components/ui/button";
 import { columns } from "@/components/products/columns";
 import { DataTable } from "@/components/data-table";
 
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import type { Product } from "@/data/product";
 //import { products } from "@/data/product"; // fake product data input
 import { useEffect, useState } from "react";
+import { getAccessToken } from "@/utils/tokenStorage";
 
 export default function ProductsPage() {
+  const navigate = useNavigate();
   const [product, setProducts] = useState<Product[]>([]); //store API Data
   const [loading, setloading] = useState<boolean>(false); //show loading message (promise server)
   //const [error, setError] = useState<string | null>(null); //show error message
@@ -38,6 +40,11 @@ export default function ProductsPage() {
     );
   //if (error) return <p>Error: {error}</p>;
 
+  //Validation token without sign in
+  const token = getAccessToken();
+  if (!token) {
+    navigate("/sign-in");
+  }
   return (
     <div>
       <div className="flex justify-between items-center  mb-3">

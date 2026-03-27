@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useDeleteProduct, useGetProduct } from "@/hooks/useCreateProduct";
 import { ChevronDown, Download, Plus, SlidersHorizontal } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 import { FiSearch } from "react-icons/fi";
 import { PopoverBox } from "@/components/popoverbox";
@@ -18,7 +18,6 @@ import { useDebounce } from "use-debounce";
 import {
   Pagination,
   PaginationContent,
-  PaginationEllipsis,
   PaginationItem,
   PaginationLink,
   PaginationNext,
@@ -33,8 +32,11 @@ import {
   SelectItem,
   Select,
 } from "@/components/ui/select";
+import { getAccessToken } from "@/utils/tokenStorage";
+import { useNavigate } from "react-router-dom";
 
 export const Product = () => {
+  const navigate = useNavigate();
   const { mutate: DeleteProductMutation } = useDeleteProduct();
   const [isOpenDrawer, setisOpenDrawer] = useState(false);
   const [isDelete, setisDelete] = useState(false);
@@ -50,10 +52,6 @@ export const Product = () => {
   //default pagination
   const [page, setPage] = useState(1);
   console.log("Curren Page:", page);
-  // Reset to page 1 whenever the debounced search value changes
-  // useEffect(() => {
-  //   setPage(1);
-  // }, [value]);
   const [limit, setLimit] = useState(10);
   console.log("limit:", limit);
 
@@ -114,6 +112,12 @@ export const Product = () => {
     setisDelete(open);
     if (!open) setseletedProduct(undefined);
   };
+
+  //Validation token without sign in
+  const token = getAccessToken();
+  if (!token) {
+    navigate("/sign-in");
+  }
   return (
     <>
       <div className="flex justify-between items-center ">
@@ -133,6 +137,7 @@ export const Product = () => {
 
       <div className="flex justify-between items-center gap-2">
         <div className="flex items-center gap-2 flex-1">
+          {/* Search Debounce */}
           <div className="relative max-w-sm flex-1">
             <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
             <Input
@@ -143,6 +148,7 @@ export const Product = () => {
               className="pl-9 "
             />
           </div>
+          {/* Filter Category */}
           <PopoverBox />
         </div>
         <div className="flex gap-2">
@@ -157,6 +163,7 @@ export const Product = () => {
           </Button>
         </div>
       </div>
+
       {/* ✅ ADD HERE */}
       {isLoading && <div className="mt-2 text-sm">Loading Product...</div>}
       {isError && (
@@ -165,11 +172,16 @@ export const Product = () => {
 
       {/* Table */}
       <DataTable
-        columns={columns({ onDelete: handleDelete, onEdit: handlEdit })}
+        columns={columns({
+          onDelete: handleDelete,
+          onEdit: handlEdit,
+          rowStartIndex: startItem,
+        })}
         data={data?.data ?? []}
       />
 
       <div className="flex justify-between w-full items-center">
+        {/* Row per page */}
         <Field orientation="horizontal" className="w-fit">
           <FieldLabel htmlFor="select-rows-per-page">Rows</FieldLabel>
           <Select
@@ -196,15 +208,15 @@ export const Product = () => {
           </Select>
         </Field>
 
-        {/* Left side: results info (show/hide Logic) */}
-        {pagination && (
-          <div className="text-sm text-muted-foreground">
-            Showing {startItem}-{endItem} of {totalItems} results
-            {/* Showing 1-10 of {pagination?.totalItems} results */}
-          </div>
-        )}
+        <div className="flex items-center gap-2  sm:space-x-6 lg:space-x-8 ">
+          {/* right side: results info (show/hide Logic) */}
+          {pagination && (
+            <div className="flex items-center whitespace-nowrap mr-4 text-sm text-muted-foreground ">
+              Showing {startItem}-{endItem} of {totalItems} results
+              {/* Showing 1-10 of {pagination?.totalItems} results */}
+            </div>
+          )}
 
-        <div className="flex items-center gap-2">
           {/* Pagination Table */}
           <Pagination className="flex justify-end">
             <PaginationContent>
@@ -223,10 +235,9 @@ export const Product = () => {
                 />
               </PaginationItem>
 
-              {/* Page Numbers */}
-
+              {/* Numbers pagination*/}
               <PaginationItem>
-                {[...Array(totalPage)].map((_, i) => {
+                {/* {[...Array(totalPage)].map((_, i) => {
                   const listPage = i + 1;
                   return (
                     <PaginationLink
@@ -238,10 +249,22 @@ export const Product = () => {
                       {listPage}
                     </PaginationLink>
                   );
+                })} */}
+
+                {Array.from({ length: totalPage }).map((_, i) => {
+                  const pageNum = i + 1;
+                  console.log("Array From: ", pageNum);
+                  return (
+                    <PaginationLink
+                      key={pageNum}
+                      isActive={pageNum == currentPage}
+                      onClick={() => setPage(pageNum)}
+                    >
+                      {pageNum}
+                    </PaginationLink>
+                  );
                 })}
               </PaginationItem>
-
-              {/* <PaginationItem><PaginationEllipsis /></PaginationItem> */}
 
               {/* Next */}
               <PaginationItem className="border rounded-md">
