@@ -11,6 +11,7 @@ import {
 // import type { ICategory } from "../types/category";
 import { X } from "lucide-react";
 
+
 interface Props<T> {
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
@@ -48,7 +49,9 @@ export function ConfirmDelete<T>({
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogCancel>
+            Cancel
+          </AlertDialogCancel>
           <AlertDialogAction
             className="bg-red-600"
             onClick={() => confirmDelete()}

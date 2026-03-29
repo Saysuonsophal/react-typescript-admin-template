@@ -144,7 +144,10 @@ export const Product = () => {
               type="text"
               placeholder="Search product"
               value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
+              onChange={(e) => {
+                setSearchInput(e.target.value);
+                setPage(1); // ✅ reset page immediately
+              }}
               className="pl-9 "
             />
           </div>

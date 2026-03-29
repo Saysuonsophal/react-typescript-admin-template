@@ -1,18 +1,33 @@
+import type { ICategory } from "@/components/types/category";
 import {
   createCategory,
   deleteCategory,
   getCategory,
   updateCategory,
 } from "@/services/categoryService";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  keepPreviousData,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
+import { data } from "react-router-dom";
 
 //userQuery using for GET method
-export const useCategories = (search?: string, page?: number, limit?: number) => {
+export const useCategories = (
+  search?: string,
+  page?: number,
+  limit?: number,
+) => {
   return useQuery({
     queryKey: ["categories", search, page, limit], //key catch
     queryFn: () => getCategory(search, page, limit), // API
-    staleTime: 100 * 60 * 10,
     
+    staleTime: 100 * 60 * 10,
+   placeholderData: keepPreviousData, //keep data when fetch new data
+    // refetchOnMount: false,
+    // refetchOnWindowFocus: false,
+    // refetchOnReconnect: false,
   });
 };
 
@@ -21,6 +36,7 @@ export const useCreateCategory = () => {
   return useMutation({
     mutationFn: createCategory,
     onSuccess: () => {
+      // ✅ Tell React Query that categories data is stale
       queryClient.invalidateQueries({
         queryKey: ["categories"],
       });
@@ -30,10 +46,12 @@ export const useCreateCategory = () => {
     },
   });
 };
+
 export const useUpdateCategory = () => {
   const queryClient = useQueryClient();
+
   return useMutation({
-    mutationFn: ({ id, request }: { id: number; request: any }) =>
+    mutationFn: ({ id, request }: { id: number; request: ICategory }) =>
       updateCategory(id, request),
     onSuccess: () => {
       queryClient.invalidateQueries({

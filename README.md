@@ -191,5 +191,10 @@ export default defineConfig([
     - After login, redirect the user to the dashboard or desired page.
     - Setup protect page if user without takon(LogIn)
       - tokan is get from localStorage
+21. API switch Fetch to Axios
+    - Install Axios
+    ```
+    npm install axios
+    ```
 
 # react-typescript-admin-template

@@ -81,7 +81,7 @@ export const ProductFormPage = ({ open, onClose, products }: Props) => {
   const { data } = useCategories();
   const categories = data?.data ?? [];
 
-  console.log("category", categories);
+  //console.log("category", categories);
 
   const isPanding = isUpdating || isCreating; // combined for the button
 

@@ -30,6 +30,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Field, FieldLabel } from "@/components/ui/field";
+//import { set } from "date-fns";
 
 // import { data } from "react-router-dom";
 
@@ -43,6 +44,11 @@ export const CategoryPage = () => {
   const [searchName, setSeaerchName] = useState("");
   const [value] = useDebounce(searchName, 500);
   //console.log("search Name:", value);
+
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSeaerchName(e.target.value);
+    setPage(1); // ✅ reset page immediately
+  };
 
   // pagination
   const [page, setPage] = useState(1);
@@ -89,6 +95,7 @@ export const CategoryPage = () => {
             position: "top-right",
           });
           setIsDeleteOpen(false);
+          setCategory(undefined);
         },
         onError: (err) => {
           toast.error(err.message || "Failed to delete category");
@@ -97,9 +104,14 @@ export const CategoryPage = () => {
     );
   };
 
-  const handleClose = (open: boolean) => {
+  const handleCencel = (open: boolean) => {
     setisOpen(open);
-    setCategory(undefined);
+    if (!open) setCategory(undefined);
+  };
+
+  const handleCloseDeleteModal = (open: boolean) => {
+    setIsDeleteOpen(open);
+    if (!open) setCategory(undefined);
   };
 
   return (
@@ -119,13 +131,18 @@ export const CategoryPage = () => {
         </div>
       </div>
 
+      {/* Search Name */}
       <div className="flex items-center gap-2 p-0">
         <div className="relative">
           <Input
             placeholder="Search Name..."
             value={searchName} // Show key input search
             className="w-[200px]"
-            onChange={(e) => setSeaerchName(e.target.value)}
+            onChange={(e) => {
+              setSeaerchName(e.target.value);
+              setPage(1);// ✅ reset page immediately
+            }}
+            
           />
         </div>
 
@@ -232,12 +249,16 @@ export const CategoryPage = () => {
         </div>
       </div>
       <div className="flex gap-2 ">
-        <CategoryForm open={isOpen} setOpen={handleClose} category={category} />
+        <CategoryForm
+          open={isOpen}
+          setOpen={handleCencel}
+          category={category}
+        />
       </div>
 
       <ConfirmDelete<ICategory>
         isOpen={isDeleteOpen}
-        setIsOpen={setIsDeleteOpen}
+        setIsOpen={handleCloseDeleteModal}
         item={category}
         title="Delete Category"
         getName={(item) => item?.name || ""}
