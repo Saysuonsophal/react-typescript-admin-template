@@ -17,7 +17,7 @@ import {
   FieldSeparator,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { Eye, EyeOff, LogIn } from "lucide-react";
+import { AlertTriangleIcon, Eye, EyeOff, LogIn } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "@tanstack/react-form";
 import { z } from "zod";
@@ -26,6 +26,11 @@ import { setAccessToken } from "@/utils/tokenStorage";
 import { Spinner } from "./ui/spinner";
 
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
+import { Alert, AlertTitle } from "./ui/alert";
+import { useSearchParams } from "react-router-dom";
+
+//import { set } from "date-fns";
 
 const loginSchema = z.object({
   email: z.string().min(1, "Email is required"),
@@ -37,9 +42,16 @@ export function LoginForm({
   ...props
 }: React.ComponentProps<"div">) {
   const navigate = useNavigate();
+  // Expired session
+  const [searchParams] = useSearchParams();
+  const reason = searchParams.get("reason");
+  console.log("LoginForm reason:", reason);
   const [show, setShow] = useState(false);
   const [error, setError] = useState("");
-  const { mutate: signInMutation, isPending } = useAuthLogin();
+  const [notRegister, setNotRegister] = useState(false);
+  const { mutate: signInMutation } = useAuthLogin();
+  const [isPending, setIsPending] = useState(false); // button spinner
+
   const form = useForm({
     defaultValues: {
       email: "",
@@ -50,20 +62,44 @@ export function LoginForm({
     },
     onSubmit: async ({ value }) => {
       setError("");
-      signInMutation(
-        { request: value },
-        {
-          onSuccess: (res) => {
-            //console.log("Auth Login Form:", res);
-            if (res?.accessToken) {
-              setAccessToken(res?.accessToken);
-              navigate("/dashboard");
-            } else {
-              setError(res?.message);
-            }
+      setNotRegister(false);
+      setIsPending(true);
+
+      setTimeout(() => {
+        signInMutation(
+          { request: value },
+          {
+            onSuccess: (res) => {
+              //console.log("FULL RESPONSE:", res);
+              // show loading toast here only on success
+              const toastId = toast.loading("Signing in...");
+              setTimeout(() => {
+                const token = res?.data?.accessToken;
+                // save token
+                if (toastId)
+                  toast.success("Login successful", {
+                    id: toastId,
+                  });
+                setAccessToken(token);
+                setIsPending(false); // reset button
+
+                navigate("/admin/product");
+              }, 1500); // 1.5s delay for success
+            },
+            onError: (err) => {
+              if (err?.message === "Invalid password") {
+                setError("Incorrect password");
+              } else {
+                setError("This email is not registered");
+                setNotRegister(true);
+              }
+
+              //toast.error("Sign In failed: " + err.message);
+              setIsPending(false); // reset button
+            },
           },
-        },
-      );
+        );
+      }, 100); // tiny delay for UX
     },
   });
 
@@ -76,6 +112,7 @@ export function LoginForm({
             Enter your email and password below to log into your account
           </CardDescription>
         </CardHeader>
+
         <CardContent>
           <form
             id="login-form"
@@ -84,6 +121,32 @@ export function LoginForm({
               form.handleSubmit();
             }}
           >
+            <div className=" mb-3">
+              {/* Session Expire */}
+              {!notRegister
+                ? reason === "session_expired" && (
+                    <Alert className="max-w-md border-amber-200  bg-amber-50 text-amber-900 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-50">
+                      <AlertTriangleIcon />
+                      <AlertTitle>
+                        Your session has expired. Please sign in again.
+                      </AlertTitle>
+                    </Alert>
+                  )
+                : ""}
+              {/*  Email Not Registered Alert */}
+              {notRegister && (
+                <Alert className="max-w-md border-red-200 bg-red-50 text-red-900">
+                  <AlertTriangleIcon />
+                  <AlertTitle>
+                    No account exists for this email.
+                    <a href="/sign-up" className="underline">
+                      Sign up instead →
+                    </a>
+                  </AlertTitle>
+                </Alert>
+              )}
+            </div>
+
             <FieldGroup>
               <div className="grid gap-3">
                 {/* Email */}
@@ -118,6 +181,9 @@ export function LoginForm({
                           {isInvalid && (
                             <FieldError errors={field.state.meta.errors} />
                           )}
+                          {error === "This email is not registered" && (
+                            <FieldError>{error}</FieldError>
+                          )}
                         </FieldContent>
                       </Field>
                     );
@@ -132,11 +198,11 @@ export function LoginForm({
                       field.state.meta.isTouched && !field.state.meta.isValid;
                     return (
                       <Field data-invalid={isInvalid}>
-                        <div className="flex items-center">
+                        <div className="flex items-center text-black">
                           <FieldLabel htmlFor={field.name}>Password</FieldLabel>
                           <a
                             href="/forgot-password"
-                            className="ml-auto text-sm underline-offset-4 hover:underline"
+                            className="ml-auto text-sm opacity-40 hover:opacity-80 underline-offset-2 hover:underline"
                           >
                             Forgot your password?
                           </a>
@@ -146,7 +212,10 @@ export function LoginForm({
                             id={field.name}
                             name={field.name}
                             value={field.state.value}
-                            onChange={(e) => field.handleChange(e.target.value)}
+                            onChange={(e) => {
+                              field.handleChange(e.target.value);
+                              setError("");
+                            }}
                             onBlur={field.handleBlur}
                             aria-invalid={isInvalid}
                             type={show ? "text" : "password"}
@@ -166,16 +235,19 @@ export function LoginForm({
                           </button>
                         </div>
                         <FieldContent>
-                          {/* {isInvalid && (
+                          {isInvalid && (
                             <FieldError errors={field.state.meta.errors} />
-                          )} */}
-                          {error ? (
+                          )}
+                          {error === "Incorrect password" && (
+                            <FieldError>{error}</FieldError>
+                          )}
+                          {/* {error ? (
                             <FieldError>{error}</FieldError>
                           ) : (
                             isInvalid && (
                               <FieldError errors={field.state.meta.errors} />
                             )
-                          )}
+                          )} */}
                         </FieldContent>
                       </Field>
                     );

@@ -1,18 +1,17 @@
 import { authLogin, type LoginPayload } from "@/services/auth.service";
 import { useMutation } from "@tanstack/react-query";
-import { toast } from "sonner";
 
 export const useAuthLogin = () => {
-//   const queryClient = useQueryClient();
+  //   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ request }: { request: LoginPayload }) => authLogin(request),
     onSuccess: () => {
-      
-      //queryClient.invalidateQueries({ queryKey: ["login"] });
+      // Global side effect: save token
+      // const token = res?.data?.accessToken;
+      // if (token) setAccessToken(token);
     },
     onError: (err: Error) => {
-      console.error("Failed to Sign In:", err.message);
-      toast.error("Failed to Sign In");
+      console.error("Login failed in hook:", err.message);
     },
   });
 };

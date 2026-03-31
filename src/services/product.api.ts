@@ -19,17 +19,12 @@
 //     FetchAPI();
 //   }, []);
 
+import api from "@/lib/axios";
 export const FetchAPI = async (search?: string) => {
-  const query = search ? `?search=${search}` : "";
-  const respon = await fetch(`http://localhost:3000/api/v1/products${query}`);
-  if (!respon.ok) {
-    throw new Error(` HTTP error! ${respon.status} to fetch products `);
-  }
-  const data = await respon.json();
-
-  console.log("Fetch API data:", data);
-
+  const data = await api.get("/api/v1/products", {
+    params: {
+      search,
+    },
+  });
   return data;
 };
-
-

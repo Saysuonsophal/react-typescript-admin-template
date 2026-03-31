@@ -1,9 +1,15 @@
-import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  keepPreviousData,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import {
   createProduct,
   deleteProduct,
   getProduct,
   updateProduct,
+  uploadProductImage,
 } from "@/services/productService";
 import { toast } from "sonner";
 import type { productSchema } from "@/schemas/product.schema";
@@ -60,6 +66,22 @@ export const useDeleteProduct = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["products"] });
+    },
+  });
+};
+
+export const useUploadProductImage = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, request }: { id: number; request: File }) =>
+      uploadProductImage(id, request),
+
+    onSuccess: () => {
+      console.log("Product image uploaded successfully");
+      queryClient.invalidateQueries({ queryKey: ["products"] });
+    },
+    onError: (err) => {
+      console.log("Failed to upload product image:", err);
     },
   });
 };

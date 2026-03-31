@@ -18,6 +18,8 @@ import { ForgotPassword } from "./pages/forgot-password";
 import { SignUp } from "./pages/sign-up";
 import { Product } from "./pages/product";
 import { Dashboard } from "./pages/Dashboard";
+import { Toaster } from "./components/ui/sonner";
+import { Loader, Check, X } from "lucide-react";
 
 // Create a client
 const queryClient = new QueryClient();
@@ -26,6 +28,18 @@ function App() {
   return (
     // Provide the client to your App
     <QueryClientProvider client={queryClient}>
+      <Toaster
+        icons={{
+          loading: <Loader className="w-4 h-4 animate-spin" />,
+          success: (
+            <div className="rounded-full w-4 h-4 bg-black flex items-center justify-center">
+              <Check className="w-3.5 h-3.5 rounded-full border-none text-white" />
+            </div>
+          ),
+          error: <X className="text-red-500" />,
+        }}
+        position="top-right"
+      />
       <BrowserRouter>
         <Routes>
           <Route path="/sign-in" element={<SignIn />} />

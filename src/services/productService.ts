@@ -31,3 +31,15 @@ export const deleteProduct = async (id: number) => {
   const data = await api.delete(`/api/v1/products/${id}`);
   return data;
 };
+
+//Assign upload file to formData
+export const uploadProductImage = async (id: number, file: File) => {
+  const formData = new FormData();
+  formData.append("file", file); // "file" is key
+  const data = await api.post(`/api/v1/products/${id}/upload`, formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+  return data;
+};

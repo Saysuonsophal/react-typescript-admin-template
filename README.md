@@ -187,14 +187,47 @@ export default defineConfig([
     - Passing the mutation hook and parameters to the form component.
     - Check respon by log in API, Hook, Form. the backend must respone(accessToken, message)
     - Implement accessToken storage in LocalStorage: (Set, Get, Remove)
-    - assign parameter to LocalStorage(Set) inside onSuccess (res?.accessToken)
+    - assign parameter to LocalStorage(Set) inside onSuccess (res?.accessToken, loading Toast)
     - After login, redirect the user to the dashboard or desired page.
     - Setup protect page if user without takon(LogIn)
       - tokan is get from localStorage
+    - Error Sign in( Invalid email/password, not register)
 21. API switch Fetch to Axios
     - Install Axios
+
     ```
     npm install axios
+    ```
+
+    - Create axios.ts in lib file
+    - adding instances code of using global Axios
+    - adding Request interceptor (handle globale Authorization )
+    - adding Response interceptor (handle globale repsone from backend)
+    - Changing Fetch to Axios API
+
+22. Secssion Expire
+    - backend authMiddleware respon status(401) or code "TOKEN_EXPIRED"
+    - Axios Response Interceptor from backend
+      - variable to get api respone (message, status, url, code)
+      - set logic to remove log token and Redirect user to signin page (/sign-in?reason=session_expired)
+      - make fallback logic to hide the real backend message
+    - Make banner alert and set logic show in loginform
+
+23. Building Upload File Image
+    - Install CLI component layout File upload (block.so)
+    - setup UI upload and preview image to ProductForm
+    - sending upload file to backend by API(PUT(id, file, header)) layer
+      - using formData
+    - assign parameter to uploadImage hook (uesMutation) in Product Hook
+    - Using hook in productForm
+      -
+
+      <a name="my-custom-anchor-point">Explain Flow Creat + Image </a><br>
+
+    ```
+    Adding Product in Form (Current process)
+      1. First API call For Create Product (success next step)
+      2. Second API call For Upload images(loop)
     ```
 
 # react-typescript-admin-template

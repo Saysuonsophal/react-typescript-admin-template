@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useDeleteProduct, useGetProduct } from "@/hooks/useCreateProduct";
 import { ChevronDown, Download, Plus, SlidersHorizontal } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { FiSearch } from "react-icons/fi";
 import { PopoverBox } from "@/components/popoverbox";
@@ -34,6 +34,7 @@ import {
 } from "@/components/ui/select";
 import { getAccessToken } from "@/utils/tokenStorage";
 import { useNavigate } from "react-router-dom";
+import FileUpload01 from "@/components/file-upload-01";
 
 export const Product = () => {
   const navigate = useNavigate();
@@ -74,6 +75,18 @@ export const Product = () => {
   //console.log("startItem", startItem);
   //console.log("End item", endItem);
 
+  //Validation token without sign in
+  // const token = getAccessToken();
+  // if (!token) {
+  //   navigate("/sign-in");
+  // }
+  useEffect(() => {
+    const token = getAccessToken();
+    if (!token) {
+      navigate("/sign-in");
+    }
+  }, [navigate]);
+
   const handleNext = () => {
     if (pagination?.nextPage) {
       setPage(pagination.nextPage);
@@ -113,13 +126,9 @@ export const Product = () => {
     if (!open) setseletedProduct(undefined);
   };
 
-  //Validation token without sign in
-  const token = getAccessToken();
-  if (!token) {
-    navigate("/sign-in");
-  }
   return (
     <>
+      <FileUpload01 />
       <div className="flex justify-between items-center ">
         <div>
           <h1 className="text-3xl font-bold">Product</h1>

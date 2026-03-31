@@ -7,7 +7,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { useCategories, useDeleteCategory } from "@/hooks/useCategory";
 import type { ICategory } from "@/components/types/category";
 import { Plus } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ConfirmDelete } from "@/components/categories/confirmModal";
 import { toast } from "sonner";
 import { useDebounce } from "use-debounce";
@@ -30,11 +30,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Field, FieldLabel } from "@/components/ui/field";
+import { useNavigate } from "react-router-dom";
+import { getAccessToken } from "@/utils/tokenStorage";
 //import { set } from "date-fns";
 
 // import { data } from "react-router-dom";
 
 export const CategoryPage = () => {
+  const navigate = useNavigate();
   const { mutate: deleteCategoryMutate } = useDeleteCategory();
   const [isOpen, setisOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
@@ -70,7 +73,15 @@ export const CategoryPage = () => {
   const startItem = (currentPage - 1) * limit + 1;
   const endItem = Math.min(currentPage * limit, totalItem);
 
-  console.log("Totla Page", totalPage);
+  //console.log("Totla Page", totalPage);
+
+  //validation token without sign in
+  useEffect(() => {
+    const token = getAccessToken();
+    if (!token) {
+      navigate("/sign-in");
+    }
+  }, [navigator]);
 
   // ACTION HANDLERS Edit/update
   const handleEdit = (category: ICategory) => {

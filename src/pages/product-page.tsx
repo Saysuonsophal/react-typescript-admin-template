@@ -13,6 +13,13 @@ export default function ProductsPage() {
   const [product, setProducts] = useState<Product[]>([]); //store API Data
   const [loading, setloading] = useState<boolean>(false); //show loading message (promise server)
   //const [error, setError] = useState<string | null>(null); //show error message
+  //Validation token without sign in
+  useEffect(() => {
+    const token = getAccessToken();
+    if (!token) {
+      navigate("/sign-in");
+    }
+  }, [navigate]);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -40,11 +47,6 @@ export default function ProductsPage() {
     );
   //if (error) return <p>Error: {error}</p>;
 
-  //Validation token without sign in
-  const token = getAccessToken();
-  if (!token) {
-    navigate("/sign-in");
-  }
   return (
     <div>
       <div className="flex justify-between items-center  mb-3">

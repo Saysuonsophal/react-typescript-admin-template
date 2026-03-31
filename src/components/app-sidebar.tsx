@@ -149,7 +149,7 @@ const data = {
       items: [
         {
           title: "Product Advanced",
-          url: "/products-api",
+          url: "/admin/products-api",
         },
         {
           title: "Introduction",
