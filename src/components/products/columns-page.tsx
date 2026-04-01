@@ -42,9 +42,17 @@ export const columns = ({
     header: "Name",
     cell: ({ row }) => (
       <div className="w-[28rem] flex gap-2 items-center ">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-sm bg-muted">
-          <img src={boxImage} className="w-5 h-5 rounded" />
+        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-sm bg-muted">
+          {row.original.productImages?.[0]?.imageURL ? (
+            <img
+              src={row.original.productImages?.[0]?.imageURL}
+              className="w-12 h-12 rounded"
+            />
+          ) : (
+            <img src={boxImage} className="w-5 h-5 rounded" />
+          )}
         </div>
+
         <div className="min-w-0">
           <p className="font-medium">{row.original.name}</p>
           <p className="text-sm text-muted-foreground truncate whitespace-nowrap">

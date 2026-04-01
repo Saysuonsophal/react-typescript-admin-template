@@ -12,5 +12,12 @@ export type IProduct = {
     name: string;
   };
   createdAt?: string;
-  //images: string[]; // 👈 Array of image URLs
+  productImages?: IProductImage[]; // 👈 Array of image URLs
+};
+
+export type IProductImage = {
+  id: number;
+  productId: number;
+  imageURL: string;
+  originalName: string;
 };

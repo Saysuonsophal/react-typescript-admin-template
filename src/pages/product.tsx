@@ -34,7 +34,7 @@ import {
 } from "@/components/ui/select";
 import { getAccessToken } from "@/utils/tokenStorage";
 import { useNavigate } from "react-router-dom";
-import FileUpload01 from "@/components/file-upload-01";
+
 
 export const Product = () => {
   const navigate = useNavigate();
@@ -128,7 +128,6 @@ export const Product = () => {
 
   return (
     <>
-      <FileUpload01 />
       <div className="flex justify-between items-center ">
         <div>
           <h1 className="text-3xl font-bold">Product</h1>

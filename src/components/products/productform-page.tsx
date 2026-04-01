@@ -38,9 +38,14 @@ import {
   Drawer,
 } from "../ui/drawer";
 
-import type { IProduct } from "../types/products";
+import type { IProduct, IProductImage } from "../types/products";
 import { useCategories } from "@/hooks/useCategory";
-import { useCreateProduct, useUpdateProduct, useUploadProductImage } from "@/hooks/useCreateProduct";
+import {
+  useCreateProduct,
+  useDeleteProductImage,
+  useUpdateProduct,
+  useUploadProductImage,
+} from "@/hooks/useCreateProduct";
 import { toast } from "sonner";
 //import { flattenBy } from "@tanstack/react-table";
 //import { toast } from "sonner";
@@ -75,6 +80,7 @@ const presetColors = [
 ];
 
 export const ProductFormPage = ({ open, onClose, products }: Props) => {
+  //console.log("Product Form:", products);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [fileProgresses, setFileProgresses] = useState<Record<string, number>>(
@@ -86,8 +92,13 @@ export const ProductFormPage = ({ open, onClose, products }: Props) => {
     useUpdateProduct();
 
   const { mutate: uploadProductImageMutate } = useUploadProductImage();
+  const { mutate: deleteProductImageMutate } = useDeleteProductImage();
+  const [colorPicker, setColorPicker] = useState(false);
   const { data } = useCategories();
   const categories = data?.data ?? [];
+
+  //remove Preview Edit image
+  const [deleteImageIds, setDeleteImageIds] = useState<number[]>([]);
 
   const isPanding = isUpdating || isCreating; // combined for the button
 
@@ -111,8 +122,26 @@ export const ProductFormPage = ({ open, onClose, products }: Props) => {
           UpdateProductMutation(
             { id: products.id, request: value },
             {
-              onSuccess: () => {
+              onSuccess: (res) => {
+                // console.log("Update response:", res);
+                //push update file images to backend
+                if (res.data?.id) {
+                  uploadedFiles.forEach((file) =>
+                    uploadProductImageMutate({
+                      id: res.data.id,
+                      request: file,
+                    }),
+                  );
+                }
+                //show remove preview image immediately after click update button
+                //console.log("Deleted image IDs:", deleteImageIds);
+                deleteImageIds.map((imageId) =>
+                  deleteProductImageMutate({ id: imageId }),
+                );
                 toast.success("Update Product successfully");
+                //clear file upload and preview after update successfully
+                setUploadedFiles([]);
+
                 onClose(false);
                 form.reset();
               },
@@ -122,27 +151,20 @@ export const ProductFormPage = ({ open, onClose, products }: Props) => {
           // Create product
           CreateProductMutation(value, {
             onSuccess: (res) => {
-              console.log("Create response:", res);
-              console.log("Uploaded files:", uploadedFiles);
+              //console.log("Create response:", res);
+              // console.log("Uploaded files:", uploadedFiles);
+
               //Upload image after create product successfully
-
-              
-              if (res.data?.id ) {
-                //push only one file image to backend
-
-                // uploadProductImageMutate({
-                //   id: res.data.id,
-                //   request: uploadedFiles[0],
-                // });
-
+              if (res.data?.id) {
                 //push multiple file images to backend
-                uploadedFiles.forEach((file)=>{
-                  uploadProductImageMutate({id: res.data.id, request: file})
-                })
+                uploadedFiles.forEach((file) => {
+                  uploadProductImageMutate({ id: res.data.id, request: file });
+                });
               }
 
-
               toast.success("Create product successfully");
+              //clear file upload and preview after update successfully
+              setUploadedFiles([]);
               onClose(false);
               form.reset();
             },
@@ -159,6 +181,7 @@ export const ProductFormPage = ({ open, onClose, products }: Props) => {
       }
     },
   });
+
   //console.log("Form input", form);
   useEffect(() => {
     if (open) {
@@ -167,7 +190,6 @@ export const ProductFormPage = ({ open, onClose, products }: Props) => {
   }, [open]);
 
   // Function handlers for file upload
-
   const handleFileSelect = (files: FileList | null) => {
     if (!files) return;
 
@@ -203,7 +225,7 @@ export const ProductFormPage = ({ open, onClose, products }: Props) => {
     e.preventDefault();
     handleFileSelect(e.dataTransfer.files);
   };
-  //remove file from UI and fileProgresses state
+  //remove preview Creat image from UI and fileProgresses state
   const removeFile = (filename: string) => {
     setUploadedFiles((prev) => prev.filter((file) => file.name !== filename));
     setFileProgresses((prev) => {
@@ -212,6 +234,19 @@ export const ProductFormPage = ({ open, onClose, products }: Props) => {
       return newProgresses;
     });
   };
+  //remove preview edit image
+  const handleDeleteImage = (id: number) => {
+    //update state of deleted image id
+    setDeleteImageIds((prev) => [...prev, id]);
+  };
+
+  // this's undo remove image function during 5s after click delete button
+  // const removePreviewImage = (id: number) => {
+  //   setDeleteImageIds((prev) => {
+  //     const update = prev.filter((imageId) => imageId !== id);
+  //     return update;
+  //   });
+  // };
 
   return (
     <Drawer direction="right" open={open} onOpenChange={onClose}>
@@ -452,10 +487,14 @@ export const ProductFormPage = ({ open, onClose, products }: Props) => {
                     <FieldContent>
                       <div className="flex items-center gap-3">
                         {/* Popover Advanced Picker */}
-                        <Popover>
+                        <Popover
+                          open={colorPicker}
+                          onOpenChange={setColorPicker}
+                        >
                           <PopoverTrigger asChild>
                             <button
                               type="button"
+                              onClick={() => setColorPicker(true)}
                               className={`h-8 w-8 rounded border-2 transition-all ${isEmpty && isInvalid ? "border-red-500 border-dashed" : isEmpty ? "border-gray-300 border-dashed" : "border-gray-300"}`}
                               style={{
                                 backgroundColor: isEmpty
@@ -476,7 +515,10 @@ export const ProductFormPage = ({ open, onClose, products }: Props) => {
                             {/* Color Picker */}
                             <HexColorPicker
                               color={currentColor || "#000000"} // string HEX color
-                              onChange={(color) => field.handleChange(color)}
+                              onChange={(color) => {
+                                field.handleChange(color);
+                                setColorPicker(false);
+                              }}
                             />
                             <Input
                               className="w-full my-2"
@@ -492,7 +534,10 @@ export const ProductFormPage = ({ open, onClose, products }: Props) => {
                                 <button
                                   key={color}
                                   type="button"
-                                  onClick={() => field.handleChange(color)}
+                                  onClick={() => {
+                                    field.handleChange(color);
+                                    setColorPicker(false);
+                                  }}
                                   className={`h-7 w-7 rounded-full border-2 transition-all ${
                                     field.state.value === color
                                       ? "border-black scale-110"
@@ -569,11 +614,56 @@ export const ProductFormPage = ({ open, onClose, products }: Props) => {
               </div>
             </div>
 
-            {/* Preview image */}
+            {/* Preview Edit Upload Image form Backend API  */}
+            {products?.productImages && products.productImages?.length > 0 && (
+              <div className="space-y-3">
+                {products.productImages
+                  .filter((image) => !deleteImageIds.includes(image.id))
+                  .map((image: IProductImage, index: number) => (
+                    <div
+                      className="border border-border rounded-lg p-2 flex flex-col"
+                      key={index}
+                    >
+                      <div className="flex items-center gap-2">
+                        <div className="w-16 h-14 bg-muted rounded-sm flex items-center justify-center self-start row-span-2 overflow-hidden">
+                          <img
+                            src={image.imageURL}
+                            alt={image.originalName}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                        <div className="flex-1 pr-1">
+                          <div className="flex justify-between items-center">
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm text-foreground truncate max-w-[260px]">
+                                {image.originalName}
+                              </span>
+                              <span className="text-sm text-muted-foreground whitespace-nowrap ">
+                                {/* {Math.round(File.size / 1024)} KB */}
+                              </span>
+                            </div>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon-sm"
+                              className="bg-transparent! hover:text-red-500"
+                              onClick={() => handleDeleteImage(image.id)}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            )}
+
+            {/* Preview upload image */}
             <div
               className={cn(
                 "pb-5 space-y-3",
-                uploadedFiles.length > 0 ? "mt-4" : "",
+                uploadedFiles.length > 0 ? "" : "",
               )}
             >
               {uploadedFiles.map((file, index) => {

@@ -213,14 +213,23 @@ export default defineConfig([
       - make fallback logic to hide the real backend message
     - Make banner alert and set logic show in loginform
 
-23. Building Upload File Image
+23. Building Upload File Image (POST)
     - Install CLI component layout File upload (block.so)
     - setup UI upload and preview image to ProductForm
-    - sending upload file to backend by API(PUT(id, file, header)) layer
-      - using formData
-    - assign parameter to uploadImage hook (uesMutation) in Product Hook
-    - Using hook in productForm
-      -
+    - sending upload file to backend by API(POST(id, file)) layer
+      - using formData, and header (type)
+    - assign parameter API to uploadImage hook (uesMutation) in Product Hook
+    - On Place Condition Hook CreateProduct
+      - Log repsonse after Success Create product
+      - Catching PorductId to set condition if have/not
+      - If having, Using forEach for handle many upload images
+      - Push images Hook (uploadImage) again to backend after finish create product
+      - Clear render to empty after success Create image
+    - Display image in columns
+      - Make relationship in backend
+      - Defined product image type
+      - Check frontend get API by using (log network)
+      - Display image in columns
 
       <a name="my-custom-anchor-point">Explain Flow Creat + Image </a><br>
 
@@ -229,5 +238,36 @@ export default defineConfig([
       1. First API call For Create Product (success next step)
       2. Second API call For Upload images(loop)
     ```
+
+24. Building Edit File Image (PUT)
+    - check/log productform get Image from Backend API
+    - Add UI Preview Edit Upload Image file getting from backend API
+      - render All images using .Map()
+    - Set logic to display or not
+    - On Place Condition Hook UpdateProduct
+      - Log repsonse after Success Upload product
+      - Catching PorductId to set condition if have/not
+      - If having, Using forEach/Map for handle many upload images in Update (one by one)
+      - Using the same Push images Hook (uploadImage) again to backend after finish create product
+      - Clear render to empty after success Update
+25. Building Delete File Image while Edit product
+    - Frontend working
+      - Create State(Array) for storage delete image Ids
+      - Make Arrow function for update state to stores image Ids when user click delete button
+
+      ```TypeScript
+      //Noted it'll only have mark as delete
+      const handleDeleteImage = (id: number) => {
+      setDeleteImageIds((prev) => [...prev, id]);
+      };
+      ```
+
+      - set logic to re-render UI that not include StateDelete(Ids) using ( .filter() )
+      - log check StatDelete(Ids) in condition hook Update Product
+      - Take StatDelete(Ids) to re-render delete one by one using (forEach/Map)
+      - Create TanStack mutation hook
+      - API service (DELETE)
+
+26. ## Building Delete File Image (Delete)
 
 # react-typescript-admin-template

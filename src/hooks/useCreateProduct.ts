@@ -7,6 +7,7 @@ import {
 import {
   createProduct,
   deleteProduct,
+  deleteProductImage,
   getProduct,
   updateProduct,
   uploadProductImage,
@@ -77,11 +78,26 @@ export const useUploadProductImage = () => {
       uploadProductImage(id, request),
 
     onSuccess: () => {
-      console.log("Product image uploaded successfully");
       queryClient.invalidateQueries({ queryKey: ["products"] });
     },
     onError: (err) => {
       console.log("Failed to upload product image:", err);
+      toast.error("Failed to upload product image");
+    },
+  });
+};
+
+export const useDeleteProductImage = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id }: { id: number }) => deleteProductImage(id),
+    onSuccess: () => {
+      //console.log("Deleted product image successfully:", res);
+      queryClient.invalidateQueries({ queryKey: ["products"] });
+    },
+    onError: (error: Error) => {
+      console.log("Failed to delete product image:", error);
+      toast.error("Failed to delete product image");
     },
   });
 };

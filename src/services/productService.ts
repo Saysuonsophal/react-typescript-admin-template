@@ -43,3 +43,8 @@ export const uploadProductImage = async (id: number, file: File) => {
   });
   return data;
 };
+export const deleteProductImage = async (id?: number) => {
+  const data = await api.delete(`/api/v1/products/images/${id}`);
+  //console.log("API Deleted image ID:", id);
+  return data;
+};
