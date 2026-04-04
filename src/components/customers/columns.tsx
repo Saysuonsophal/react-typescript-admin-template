@@ -3,12 +3,15 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import { ActionMenu } from "../users/action-tooltip";
 import { format } from "date-fns";
+import { CustomerAvatar } from "../profileAvatar";
 
 // This type is used to define the shape of our data.
 // You can use a Zod schema here if you want.
 export type Customer = {
   id: string;
-  username: number;
+  firstname: string;
+  lastname: string;
+  username: string;
   createdAt: string;
   email: string;
 };
@@ -19,8 +22,10 @@ export const columns: ColumnDef<Customer>[] = [
     header: "Id",
   },
   {
-    accessorKey: "username",
+    id: "fullname",
+    // accessorKey: "fullname",
     header: "Customer",
+    cell: ({ row }) => <CustomerAvatar customer={row.original} />,
   },
   {
     accessorKey: "email",
@@ -35,7 +40,15 @@ export const columns: ColumnDef<Customer>[] = [
     },
   },
   {
-    accessorKey: "amount",
+    accessorKey: "order",
+    header: "Order",
+  },
+  {
+    accessorKey: "totalSpent",
+    header: "Total Spent",
+  },
+  {
+    id: "actions",
     header: "Action",
     cell: ({ row }) => {
       return (

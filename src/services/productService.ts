@@ -2,6 +2,23 @@
 import type { productSchema } from "@/schemas/product.schema";
 import api from "@/lib/axios";
 
+// interface ProductResponse {
+//   data: {
+//     id: number;
+//     name: string;
+//     description: string;
+//     price: number;
+//     imageUrl?: string;
+//     createdAt: string;
+//     updatedAt: string;
+//   }[];
+//   pagination: {
+//     page: number;
+//     limit: number;
+//     total: number;
+//   };
+// }
+
 export const getProduct = async (
   search?: string,
   page: number = 1,

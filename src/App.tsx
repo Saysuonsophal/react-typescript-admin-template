@@ -20,6 +20,7 @@ import { Product } from "./pages/product";
 import { Dashboard } from "./pages/Dashboard";
 import { Toaster } from "./components/ui/sonner";
 import { Loader, Check, X } from "lucide-react";
+import { PosPage } from "./pages/PosPage";
 
 // Create a client
 const queryClient = new QueryClient();
@@ -61,6 +62,7 @@ function App() {
             <Route path="/admin/categories" element={<CategoryPage />}></Route>
             <Route path="/admin/customers" element={<CustomerPage />}></Route>
             <Route path="/admin/product" element={<Product />}></Route>
+            <Route path="/admin/pos" element={<PosPage />}></Route>
           </Route>
         </Routes>
       </BrowserRouter>

@@ -46,7 +46,7 @@ export const columns = ({
           {row.original.productImages?.[0]?.imageURL ? (
             <img
               src={row.original.productImages?.[0]?.imageURL}
-              className="w-12 h-12 rounded"
+              className="w-12 h-12 object-cover rounded"
             />
           ) : (
             <img src={boxImage} className="w-5 h-5 rounded" />

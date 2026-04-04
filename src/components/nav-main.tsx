@@ -15,11 +15,10 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
-//import { Link, useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 
-export function NavMain({
-  items,
-}: {
+interface Props {
+  title: string;
   items: {
     title: string;
     url: string;
@@ -30,13 +29,15 @@ export function NavMain({
       url: string;
     }[];
   }[];
-}) {
+}
+
+export function NavMain({ items, title }: Props) {
   // ✅ UPDATED: moved outside map to avoid calling inside loop
-  //const location = useLocation();
+  const location = useLocation();
 
   return (
     <SidebarGroup>
-      <SidebarGroupLabel>Platform</SidebarGroupLabel>
+      <SidebarGroupLabel>{title}</SidebarGroupLabel>
       <SidebarMenu>
         {items.map((item) => (
           <Collapsible
@@ -61,7 +62,10 @@ export function NavMain({
                         asChild
                         //aria-disabled={location.pathname === subItem.url} // ✅ UPDATED: disable same-route click
                       >
-                        <a href={subItem.url}>
+                        <a
+                          href={subItem.url}
+                          className={`${location.pathname === subItem.url ? "bg-[var(--accent)]" : ""}`} // ✅ UPDATED: visually indicate disabled state
+                        >
                           <span>{subItem.title}</span>
                         </a>
                         {/* ✅ UPDATED: replaced <a> with <Link> to prevent full page reload */}

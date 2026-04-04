@@ -251,7 +251,7 @@ export const ProductFormPage = ({ open, onClose, products }: Props) => {
   return (
     <Drawer direction="right" open={open} onOpenChange={onClose}>
       <DrawerContent key={products?.id ?? "new"} className="sm:max-w-md">
-        <div className="sticky top-0 z-10 bg-white border-b">
+        <div className="sticky top-0 z-10 bg-white dark:bg-black border-b">
           {/* Close Icon */}
           <DrawerClose asChild>
             <button className="absolute right-4 top-4 rounded-sm opacity-30 transition-opacity hover:opacity-100 focus:outline-none">
@@ -747,7 +747,7 @@ export const ProductFormPage = ({ open, onClose, products }: Props) => {
           </FieldGroup>
         </form>
 
-        <DrawerFooter className="sticky bottom-0 bg-white space-y-1 flex justify-end gap-2">
+        <DrawerFooter className="sticky bottom-0 bg-white dark:bg-black space-y-1 flex justify-end gap-2">
           <DrawerClose asChild>
             <Button variant="outline" onClick={() => onClose(false)}>
               Close
@@ -757,7 +757,7 @@ export const ProductFormPage = ({ open, onClose, products }: Props) => {
             type="submit"
             form="product-form"
             disabled={isPanding}
-            className="bg-black"
+            className="bg-black dark:bg-white text-white dark:text-black"
           >
             {isPanding
               ? "Saving.."

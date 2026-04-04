@@ -32,7 +32,7 @@ export function PopoverBox() {
             <div className="self-stretch flex items-center rounded-none px-2 border-l border-dashed ">
               <Badge
                 variant="secondary"
-                className="ml-1 rounded-sm px-1 py-0.5 bg-gray-100"
+                className="ml-1 rounded-sm px-1 py-0.5 bg-gray-100 text-black"
               >
                 2
               </Badge>

@@ -13,6 +13,11 @@ import {
   Settings2,
   SquareTerminal,
   ShieldCheck,
+  LayoutDashboard,
+  Settings,
+  UserRoundCog,
+  Bell,
+  CircleQuestionMark,
 } from "lucide-react";
 
 import { NavMain } from "@/components/nav-main";
@@ -53,7 +58,7 @@ const data = {
   ],
   navMain: [
     {
-      title: "Build Your Application",
+      title: "E commerce Application",
       url: "#",
       icon: SquareTerminal,
       isActive: true,
@@ -197,15 +202,15 @@ const data = {
       ],
     },
   ],
-  projects: [
+  overviews: [
     {
       name: "Dashboard",
       url: "/dashboard",
-      icon: PieChart,
+      icon: LayoutDashboard,
     },
     {
-      name: "Design Engineering",
-      url: "#",
+      name: "POS",
+      url: "/admin/pos",
       icon: Frame,
     },
     {
@@ -219,6 +224,28 @@ const data = {
       icon: Map,
     },
   ],
+  systems: [
+    {
+      name: "Users",
+      url: "#",
+      icon: UserRoundCog,
+    },
+    {
+      name: "Notifications",
+      url: "#",
+      icon: Bell,
+    },
+    {
+      name: "Settings",
+      url: "#",
+      icon: Settings,
+    },
+    {
+      name: "Help & Support",
+      url: "#",
+      icon: CircleQuestionMark,
+    },
+  ],
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
@@ -228,8 +255,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <TeamSwitcher teams={data.teams} />
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} />
-        <NavProjects projects={data.projects} />
+        <NavProjects projects={data.overviews} title="Overview" />
+        <NavMain items={data.navMain} title="Pages" />
+        <NavProjects projects={data.systems} title="Systems" />
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={data.user} />

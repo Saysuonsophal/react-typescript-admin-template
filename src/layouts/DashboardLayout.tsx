@@ -25,7 +25,7 @@ const DashboardLayout = () => {
     <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
       <SidebarProvider>
         <AppSidebar />
-        <SidebarInset>
+        <SidebarInset className="min-w-0 flex flex-col ">
           <header className="flex h-15 shrink-0 backdrop-blur-lg sticky top-0 z-50 items-center justify-between gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-15">
             {/* LEFT SIDE oklch(92.9% .013 255.508)*/}
             <div className="flex items-center gap-2 px-4">
@@ -35,19 +35,7 @@ const DashboardLayout = () => {
                 className="mr-2 data-[orientation=vertical]:h-4"
               />
 
-              <Breadcrumb>
-                <BreadcrumbList>
-                  <BreadcrumbItem className="hidden md:block">
-                    <BreadcrumbLink href="#">
-                      Build Your Application
-                    </BreadcrumbLink>
-                  </BreadcrumbItem>
-                  <BreadcrumbSeparator className="hidden md:block" />
-                  <BreadcrumbItem>
-                    <BreadcrumbPage>Data Fetching</BreadcrumbPage>
-                  </BreadcrumbItem>
-                </BreadcrumbList>
-              </Breadcrumb>
+              {/* Global serach */}
             </div>
 
             {/* RIGHT SIDE */}
@@ -57,10 +45,23 @@ const DashboardLayout = () => {
             </div>
           </header>
 
-          <div className="flex flex-1 flex-col gap-2 p-4 pt-0">
-            <p className="text-center font-bold text-3xl ">
+          <div className="flex flex-1 min-w-0 flex-col gap-2 p-4 pt-0 overflow-hidden">
+            {/* <p className="text-center font-bold text-3xl ">
               Dashboard Layout page
-            </p>
+            </p> */}
+            <Breadcrumb>
+              <BreadcrumbList>
+                <BreadcrumbItem className="hidden md:block">
+                  <BreadcrumbLink href="#">
+                    Build Your Application
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator className="hidden md:block" />
+                <BreadcrumbItem>
+                  <BreadcrumbPage>Data Fetching</BreadcrumbPage>
+                </BreadcrumbItem>
+              </BreadcrumbList>
+            </Breadcrumb>
 
             <Outlet />
             <Toaster position="top-right" />

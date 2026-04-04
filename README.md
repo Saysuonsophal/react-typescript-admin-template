@@ -268,6 +268,13 @@ export default defineConfig([
       - Create TanStack mutation hook
       - API service (DELETE)
 
-26. ## Building Delete File Image (Delete)
+26. Make POS in admin darshboard
+    - Add compoment Scroll Area in Shadcn
+    - Import Component POS and Fix UI
+    - Call product hook data from API (new method toFixed())
+    - Call category hook data From API
+    - Render product fetch in product place of POS
+
+27. ## Building Delete File Image (Delete)
 
 # react-typescript-admin-template

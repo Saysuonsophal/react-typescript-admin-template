@@ -32,9 +32,10 @@ import {
   SelectItem,
   Select,
 } from "@/components/ui/select";
+// Tab
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getAccessToken } from "@/utils/tokenStorage";
 import { useNavigate } from "react-router-dom";
-
 
 export const Product = () => {
   const navigate = useNavigate();
@@ -128,10 +129,10 @@ export const Product = () => {
 
   return (
     <>
-      <div className="flex justify-between items-center ">
+      <div className="flex justify-between items-center mb-3 ">
         <div>
-          <h1 className="text-3xl font-bold">Product</h1>
-          <span className="text-md text-gray-500">
+          <h1 className="text-2xl font-bold mb-1">Product</h1>
+          <span className="text-sm text-gray-500">
             Practice Building CRUD. Browse and manage your product catalog.
           </span>
         </div>
@@ -141,6 +142,17 @@ export const Product = () => {
             Add Product
           </Button>
         </div>
+      </div>
+
+      {/* Tabs */}
+      <div className="my-2">
+        <Tabs defaultValue="preview">
+          <TabsList>
+            <TabsTrigger value="all">All</TabsTrigger>
+            <TabsTrigger value="active">Active</TabsTrigger>
+            <TabsTrigger value="inactive">Inactive</TabsTrigger>
+          </TabsList>
+        </Tabs>
       </div>
 
       <div className="flex justify-between items-center gap-2">
@@ -159,6 +171,7 @@ export const Product = () => {
               className="pl-9 "
             />
           </div>
+
           {/* Filter Category */}
           <PopoverBox />
         </div>
