@@ -273,7 +273,20 @@ export default defineConfig([
     - Import Component POS and Fix UI
     - Call product hook data from API (new method toFixed())
     - Call category hook data From API
-    - Render product fetch in product place of POS
+    - Render product fetch in product render place of POS
+    - Render category fetch in category render place of POS
+    - Make Add to Cart
+      - create orderItems state
+      - build function add to Order(get object user click)
+        - logic check stock availability
+        - logic Update stock local initialize in product render
+        - logic Update Order item in orderItem render place
+          - check exiting item
+            - alert notify (if exiting, no stock)
+            - Update a QTY (if exiting, available stock)
+          - Adding new item if no exiting item
+            - separede old state(prev)
+            - add all fields(id,name,qty,price,...)
 
 27. ## Building Delete File Image (Delete)
 

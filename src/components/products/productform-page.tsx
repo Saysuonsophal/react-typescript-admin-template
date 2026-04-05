@@ -52,6 +52,7 @@ import { toast } from "sonner";
 import { z } from "zod";
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
+import { set } from "date-fns";
 
 const productSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -124,7 +125,8 @@ export const ProductFormPage = ({ open, onClose, products }: Props) => {
             {
               onSuccess: (res) => {
                 // console.log("Update response:", res);
-                //push update file images to backend
+
+                //push new update file images to backend after update product successfully
                 if (res.data?.id) {
                   uploadedFiles.forEach((file) =>
                     uploadProductImageMutate({
@@ -134,14 +136,14 @@ export const ProductFormPage = ({ open, onClose, products }: Props) => {
                   );
                 }
                 //show remove preview image immediately after click update button
-                //console.log("Deleted image IDs:", deleteImageIds);
                 deleteImageIds.map((imageId) =>
                   deleteProductImageMutate({ id: imageId }),
                 );
                 toast.success("Update Product successfully");
                 //clear file upload and preview after update successfully
                 setUploadedFiles([]);
-
+                setDeleteImageIds([]);
+                console.log("Deleting image IDs:", deleteImageIds);
                 onClose(false);
                 form.reset();
               },
@@ -239,14 +241,6 @@ export const ProductFormPage = ({ open, onClose, products }: Props) => {
     //update state of deleted image id
     setDeleteImageIds((prev) => [...prev, id]);
   };
-
-  // this's undo remove image function during 5s after click delete button
-  // const removePreviewImage = (id: number) => {
-  //   setDeleteImageIds((prev) => {
-  //     const update = prev.filter((imageId) => imageId !== id);
-  //     return update;
-  //   });
-  // };
 
   return (
     <Drawer direction="right" open={open} onOpenChange={onClose}>
@@ -647,7 +641,9 @@ export const ProductFormPage = ({ open, onClose, products }: Props) => {
                               variant="ghost"
                               size="icon-sm"
                               className="bg-transparent! hover:text-red-500"
-                              onClick={() => handleDeleteImage(image.id)}
+                              onClick={() =>
+                                handleDeleteImage(image.id) ?? null
+                              }
                             >
                               <Trash2 className="h-4 w-4" />
                             </Button>

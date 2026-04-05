@@ -20,11 +20,15 @@ import {
   // Warehouse,
   CreditCard,
   QrCode,
+  Minus,
 } from "lucide-react";
 import { useGetProduct } from "@/hooks/useCreateProduct";
 import type { IProduct } from "@/components/types/products";
 import { useCategories } from "@/hooks/useCategory";
 import type { ICategory } from "@/components/types/category";
+import { toast } from "sonner";
+import type { ICart } from "@/components/types/cart";
+import { set } from "date-fns";
 
 interface MenuItem {
   id: string;
@@ -147,24 +151,7 @@ const menuItems: MenuItem[] = [
 
 export const PosPage = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
-  const [orderItems, setOrderItems] = useState<OrderItem[]>([
-    { ...menuItems[3], quantity: 1, price: 12.0 },
-    { ...menuItems[4], quantity: 1, price: 14.0 },
-    { ...menuItems[5], quantity: 1, price: 45.0 },
-    { ...menuItems[6], quantity: 1, price: 22.0 },
-    { ...menuItems[6], quantity: 1, price: 22.0 },
-    { ...menuItems[6], quantity: 1, price: 22.0 },
-    { ...menuItems[6], quantity: 1, price: 22.0 },
-    { ...menuItems[6], quantity: 1, price: 22.0 },
-    {
-      id: "9",
-      name: "Duck carpaccio",
-      category: "Special",
-      price: 18.0,
-      image: "",
-      quantity: 1,
-    },
-  ]);
+  const [orderItems, setOrderItems] = useState<ICart[]>([]);
   const [draftNumber, setDraftNumber] = useState(1);
 
   //fetch Product data from api
@@ -172,31 +159,90 @@ export const PosPage = () => {
   //fetch Category from api
   const { data: categoryData } = useCategories();
   console.log("Fetched Categories:", categoryData);
-  const products = (productData?.data as IProduct[]) ?? [];
-  console.log("Fetched Products:", products);
+  //const products = (productData?.data as IProduct[]) ?? [];
+  //console.log("Fetched Products:", products);
   const categories = (categoryData?.data as ICategory[]) ?? [];
+  const [products, setProducts] = useState<IProduct[]>([]);
+
+  // 👉 choose source dynamically
+  const displayProducts =
+    products.length > 0 ? products : ((productData?.data as IProduct[]) ?? []);
+
+  // console.log("Initial Stock:", displayProducts);
 
   //  const [selectedCategory, setSelectedCategory] = useState(null);
   // const [orderItems, setOrderItems] = useState([]);
   // const [sidebarOpen, setSidebarOpen] = useState(false);
   // const draftNumber = 1;
 
-  // const addToOrder = (item: MenuItem) => {
-  //   const existingItem = orderItems.find(
-  //     (orderItem) => orderItem.id === item.id,
-  //   );
-  //   if (existingItem) {
-  //     setOrderItems(
-  //       orderItems.map((orderItem) =>
-  //         orderItem.id === item.id
-  //           ? { ...orderItem, quantity: orderItem.quantity + 1 }
-  //           : orderItem,
-  //       ),
-  //     );
-  //   } else {
-  //     setOrderItems([...orderItems, { ...item, quantity: 1 }]);
-  //   }
-  // };
+  // Get order item(object) when user click adding order
+  const addToCart = (product: IProduct) => {
+    console.log("Adding to order item Object:", product);
+
+    //logic: check stock availability
+    if (product.qty <= 0) {
+      toast.warning("Sorry, this item is out of stock.");
+      return;
+    }
+    // Update stock after adding to order
+    setProducts((prev) => {
+      const source =
+        prev.length > 0 ? prev : ((productData?.data as IProduct[]) ?? []);
+
+      return source.map((p) =>
+        p.id === product.id ? { ...p, qty: p.qty - 1 } : p,
+      );
+    });
+
+    //Logic: Update order items state(old state(prev)) in Cart
+    setOrderItems((prev) => {
+      // exits item in order place
+      const existingItem = prev.find(
+        (orderItem) => orderItem.id === product.id,
+      );
+
+      // if item exists, check if quantity exceeds stock (Max stock)
+      if (existingItem) {
+        if (existingItem.qty >= existingItem.stock) {
+          toast.warning("Product out of stock. Cannot add more to the order.");
+          return prev; // No update to orderItems
+        }
+
+        // Update quantity if item already exists in order
+        return prev.map((orderItem) =>
+          orderItem.id === product.id
+            ? { ...orderItem, qty: orderItem.qty + 1 }
+            : orderItem,
+        );
+      }
+
+      //Logic: Add new item quantity 1 if item does not exist in order
+      return [
+        ...prev,
+        {
+          id: product.id,
+          category: product.category?.name ?? "UnCategory",
+          name: product.name,
+          price: Number(product.price),
+          qty: 1,
+          imageUrl: product.productImages?.[0]?.imageURL ?? "../assets/box.png",
+          stock: product.qty,
+        },
+      ];
+    });
+
+    if (existingItems) {
+      setOrderItems(
+        orderItems.map((orderItem) =>
+          orderItem.id === item.id
+            ? { ...orderItem, quantity: orderItem.quantity + 1 }
+            : orderItem,
+        ),
+      );
+    } else {
+      setOrderItems([...orderItems, { ...item, quantity: 1 }]);
+    }
+  };
 
   // const removeFromOrder = (id: string) => {
   //   setOrderItems(orderItems.filter((item) => item.id !== id));
@@ -215,7 +261,7 @@ export const PosPage = () => {
   // };
 
   const subtotal = orderItems.reduce(
-    (sum, item) => sum + item.price * item.quantity,
+    (sum, item) => sum + item.price * item.qty,
     0,
   );
   const tax = subtotal * 0.1;
@@ -320,14 +366,14 @@ export const PosPage = () => {
 
           {/* Menu Items Grid */}
           <div className="flex-1 overflow-auto overflow-y-auto py-6 pr-4 pl-2">
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
-              {products.map((item: IProduct) => (
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+              {displayProducts.map((item: IProduct) => (
                 <Card
                   key={item.id}
                   className="cursor-pointer transition-shadow hover:shadow-lg p-0"
-                  // onClick={() => addToOrder(item)}
+                  onClick={() => addToCart(item)}
                 >
-                  <CardContent className="p-0 h-[40vh]">
+                  <CardContent className="p-0 h-[40vh] sm:h-[40vh] xl:h-[35vh]">
                     <div className="relative aspect-video overflow-hidden rounded-t-lg h-[60%] w-full">
                       <img
                         src={
@@ -335,17 +381,26 @@ export const PosPage = () => {
                           "../assets/box.png"
                         }
                         alt={item.name}
-                        className="h-full w-full object-contain object-center transition-transform hover:scale-105"
+                        className="h-full w-full object-contain object-center transition-transform"
                       />
                     </div>
-                    <div className="p-4">
-                      <h3 className="mb-1 font-semibold">{item.name}</h3>
-                      <p className="text-muted-foreground mb-2 text-sm">
+                    <div className="p-4 h-[40%]">
+                      <h3 className="mb-1 md:text-[16px] font-semibold truncate">
+                        {item.name}
+                      </h3>
+                      <p className="text-muted-foreground mb-2 text-sm ">
                         {item.category?.name}
                       </p>
-                      <p className="text-lg font-bold text-blue-600">
-                        {/* ${item.price.toFixed(2)} */}${item.price}
-                      </p>
+                      <div className="flex justify-between flex-wrap items-center gap-0.5">
+                        <p className="text-lg md:text-[18px] font-bold text-blue-600">
+                          {/* ${item.price.toFixed(2)} */}${item.price}
+                        </p>
+                        <p className="text-muted-foreground text-xs">
+                          {item.qty === 0
+                            ? "Out of Stock"
+                            : `In Stock: ${item.qty}`}
+                        </p>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
@@ -355,7 +410,7 @@ export const PosPage = () => {
         </div>
 
         {/* Right Sidebar - Order Summary lg:grid-cols-[1fr_300px] md:flex lg:flex */}
-        <div className="flex flex-col border-l overflow-auto h-90 md:h-auto md:w-90 xl:w-100 2xl:w-full">
+        <div className="flex flex-col border-l overflow-auto h-90 md:h-auto md:w-90 xl:w-100 2xl:w-full relative">
           <div className="border-b p-4.5">
             <div className="flex items-center justify-between">
               <h2 className="font-semibold">
@@ -368,24 +423,57 @@ export const PosPage = () => {
             </div>
           </div>
 
-          <ScrollArea className="overflow-y-auto 2xl:h-screen">
-            <div className="space-y-3 p-4">
+          <ScrollArea className="overflow-y-auto h-[50vh] 2xl:h-screen">
+            <div className="space-y-4 p-4">
               {orderItems.map((item, index) => (
                 <div
                   key={`${item.id}-${index}`}
-                  className="flex items-center gap-3"
+                  className="flex items-center gap-1 "
                 >
-                  <div className="bg-muted flex h-12 w-12 items-center justify-center rounded-lg">
-                    <span className="text-lg">{index + 1}</span>
+                  <div className="bg-white flex h-18 w-20 items-center justify-center rounded-sm">
+                    {/* <span className="text-lg">{index + 1}</span> */}
+                    <div className="">
+                      <img
+                        src={item.imageUrl}
+                        alt={item.name}
+                        className="h-full w-full object-contain object-center rounded-lg"
+                      />
+                    </div>
                   </div>
-                  <div className="flex-1">
-                    <h4 className="text-sm font-medium">{item.name}</h4>
-                    <p className="text-muted-foreground text-xs">
-                      {item.description || "Lorem ipsum dolor sit"}
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <p className="font-semibold">${item.price.toFixed(2)}</p>
+
+                  <div className="grid grid-cols-[1fr_auto] grid-rows-2 gap-x-2 w-full place-content-between">
+                    {/* Row 1 - LEFT */}
+                    <div>
+                      <h4 className="text-sm font-medium">{item.name}</h4>
+                      <p className="text-muted-foreground text-xs">
+                        {item.category ?? ""}
+                      </p>
+                    </div>
+
+                    {/* Row 1 - RIGHT (Trash) */}
+                    <div className="justify-self-end">
+                      <Trash2 className="h-4 w-4 text-red-600 cursor-pointer" />
+                    </div>
+
+                    {/* Row 2 - LEFT (Qty) */}
+                    <div className="flex items-end gap-3 py-1 ">
+                      <button className="p-[4px] rounded bg-gray-100 hover:bg-gray-300">
+                        <Minus className="w-4 h-4" />
+                      </button>
+
+                      <span>{item.qty}</span>
+
+                      <button className="p-[4px] rounded bg-blue-600 hover:bg-blue-700">
+                        <Plus className="w-4 h-4 text-white" />
+                      </button>
+                    </div>
+
+                    {/* Row 2 - RIGHT (Price) */}
+                    <div className="justify-end items-end self-end text-right py-1 font-semibold bg-amber-200">
+                      <span className="font-semibold">
+                        ${item.price * item.qty}
+                      </span>
+                    </div>
                   </div>
                 </div>
               ))}
