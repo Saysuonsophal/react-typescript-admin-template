@@ -250,7 +250,7 @@ export default defineConfig([
       - If having, Using forEach/Map for handle many upload images in Update (one by one)
       - Using the same Push images Hook (uploadImage) again to backend after finish create product
       - Clear render to empty after success Update
-25. Building Delete File Image while Edit product
+25. Building Delete File Image while Edit product (Delete)
     - Frontend working
       - Create State(Array) for storage delete image Ids
       - Make Arrow function for update state to stores image Ids when user click delete button
@@ -287,7 +287,37 @@ export default defineConfig([
           - Adding new item if no exiting item
             - separede old state(prev)
             - add all fields(id,name,qty,price,...)
+27. Make Inscrease QTY in Cart render
+    - provide item id(object) in chat that click increase
+    - Fetch all products
+    - Find item id(object) of fetch all products
+    - logic check item increase and Check Stock, (return if no stock)
+    - set Product State to re-render(Add qty - 1)
+    - set orderItem State to re-render(Add qty + 1)
 
-27. ## Building Delete File Image (Delete)
+28. Make decrease QTY in Cart render
+    - provide item id(object) in chat that click increase
+    - Find item id(object) of orderItem State
+    - logic check item ,return if no found
+    - logic check QTY small than 1 (remove items of Cart)
+    - set Product State to re-render(Add qty + 1)
+    - set orderItem State to re-render(Add qty - 1)
+
+29. Checkout Processing
+    - Add CheckoutModal component
+    - Assign Modal to POS page when checkout (Order summery)
+      - Render OrderItem
+      - Add Total price
+      - Button Payment to click (call Hook POST(Order))
+    - Assing orderItems from Frontend to Backend route (order)
+      - API(POST) & Data Type (same type in Postman) service
+      - uesMutation hook (TanStack)
+      - Calling Hook(TanStack) use in POS page
+      - set fn to button Payment
+        - prepare payload variable same Data Type in API
+        - adding payload to Callig Hook(Tanstack)
+        - Making success Modal popup when OnSuccess Hook 
+
+
 
 # react-typescript-admin-template

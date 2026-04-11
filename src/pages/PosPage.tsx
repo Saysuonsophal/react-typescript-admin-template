@@ -21,6 +21,7 @@ import {
   CreditCard,
   QrCode,
   Minus,
+  CircleX,
 } from "lucide-react";
 import { useGetProduct } from "@/hooks/useCreateProduct";
 import type { IProduct } from "@/components/types/products";
@@ -29,6 +30,11 @@ import type { ICategory } from "@/components/types/category";
 import { toast } from "sonner";
 import type { ICart } from "@/components/types/cart";
 import { set } from "date-fns";
+import CheckoutDialog from "@/components/CheckoutDialog";
+
+import { useCreateOrder } from "@/hooks/useOrder";
+import type { OrderPayload } from "@/services/order.service";
+import { Spinner } from "@/components/ui/spinner";
 
 interface MenuItem {
   id: string;
@@ -152,13 +158,17 @@ const menuItems: MenuItem[] = [
 export const PosPage = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
   const [orderItems, setOrderItems] = useState<ICart[]>([]);
-  const [draftNumber, setDraftNumber] = useState(1);
+  const [isOpen, setIsOpen] = useState(false);
 
   //fetch Product data from api
   const { data: productData } = useGetProduct();
   //fetch Category from api
   const { data: categoryData } = useCategories();
-  console.log("Fetched Categories:", categoryData);
+  //fetch Order data from api
+  const { mutate: createOrderMutate, isPending } = useCreateOrder();
+
+  const [modalState, setModalState] = useState("idle"); // "idle" | "loading" | "success" | "error"
+
   //const products = (productData?.data as IProduct[]) ?? [];
   //console.log("Fetched Products:", products);
   const categories = (categoryData?.data as ICategory[]) ?? [];
@@ -230,42 +240,157 @@ export const PosPage = () => {
         },
       ];
     });
-
-    if (existingItems) {
-      setOrderItems(
-        orderItems.map((orderItem) =>
-          orderItem.id === item.id
-            ? { ...orderItem, quantity: orderItem.quantity + 1 }
-            : orderItem,
-        ),
-      );
-    } else {
-      setOrderItems([...orderItems, { ...item, quantity: 1 }]);
-    }
   };
 
-  // const removeFromOrder = (id: string) => {
-  //   setOrderItems(orderItems.filter((item) => item.id !== id));
-  // };
+  // check stock availability before allowing QTY increase
+  const getAvailableStock = (id: number): number => {
+    const productList =
+      products.length > 0
+        ? products
+        : ((productData?.data as IProduct[]) ?? []);
+    return productList.find((p) => p.id === id)?.qty ?? 0;
+  };
 
-  // const updateQuantity = (id: string, quantity: number) => {
-  //   if (quantity === 0) {
-  //     removeFromOrder(id);
-  //   } else {
-  //     setOrderItems(
-  //       orderItems.map((item) =>
-  //         item.id === id ? { ...item, quantity } : item,
-  //       ),
-  //     );
-  //   }
-  // };
+  const increaseQty = (id: number) => {
+    // Single source of truth: resolve the product list once, outside both setters
+    const productList: IProduct[] =
+      products.length > 0
+        ? products
+        : ((productData?.data as IProduct[]) ?? []);
+
+    const currentItem = productList.find((p) => p.id === id);
+
+    //check stock availability before updating state
+    if (!currentItem || currentItem.qty <= 0) {
+      toast.warning("Product out of stock.");
+      return;
+    }
+
+    // Both state updates are now safe — stock was verified above
+    setProducts((prev) =>
+      prev.map((p) => (p.id === id ? { ...p, qty: p.qty - 1 } : p)),
+    );
+
+    //
+    setOrderItems((prev) =>
+      prev.map((item) =>
+        item.id === id ? { ...item, qty: item.qty + 1 } : item,
+      ),
+    );
+  };
+
+  // Decrease QTY when click minus button in Cart
+  const decreaseQty = (id: number) => {
+    const cartItem = orderItems.find((item) => item.id === id);
+    console.log(
+      "Decreasing quantity for item ID:",
+      id,
+      "Current cart item:",
+      cartItem,
+    );
+    if (!cartItem) return; // No item found, do nothing
+    if (cartItem.qty <= 1) {
+      removeFromCart(id, cartItem.qty); // Remove item if qty goes to 0 or less
+      return;
+    }
+    // restore stock on Product Card
+    setProducts((prev) =>
+      prev.map((p) => (p.id === id ? { ...p, qty: p.qty + 1 } : p)),
+    );
+    // Update order item qty in Cart
+    setOrderItems((prev) =>
+      prev.map((item) =>
+        item.id === id ? { ...item, qty: item.qty - 1 } : item,
+      ),
+    );
+  };
+
+  const removeFromCart = (id: number, qty: number) => {
+    console.log("Removing from order item ID:", id);
+    setOrderItems((prev) => prev.filter((item) => item.id !== id));
+    console.log("Updated Order Items after removal:", orderItems);
+
+    //restore stock on Product Card when remove item from Cart
+    setProducts((prev) => {
+      const source =
+        prev.length > 0 ? prev : ((productData?.data as IProduct[]) ?? []);
+      return source.map((prev) =>
+        prev.id === id ? { ...prev, qty: prev.qty + qty } : prev,
+      );
+    });
+  };
+  const clearAllCartItems = () => {
+    if (!window.confirm("Clear all items, Are you sure?")) return;
+    // orderItems.forEach((item) => {
+    //   setProducts((prev) =>
+    //     prev.map((p) =>
+    //       p.id === item.id ? { ...p, qty: p.qty + item.qty } : p,
+    //     ),
+    //   );
+    // });
+
+    setProducts(
+      (prev) => (
+        console.log("Restoring stock for all items:", prev),
+        prev.map((p) => {
+          const cartItem = orderItems.find((item) => item.id === p.id);
+          console.log(
+            "Restoring stock for product ID:",
+            p.id,
+            "Cart item found:",
+            cartItem,
+          );
+          if (cartItem) {
+            return cartItem ? { ...p, qty: p.qty + cartItem.qty } : p;
+          }
+          return p;
+        })
+      ),
+    );
+
+    setOrderItems([]);
+  };
 
   const subtotal = orderItems.reduce(
     (sum, item) => sum + item.price * item.qty,
     0,
   );
-  const tax = subtotal * 0.1;
-  const total = subtotal + tax;
+  // const tax = subtotal * 0.1;
+  const total = subtotal;
+
+  // Handle place order logic here
+  const handlePlaceOrder = () => {
+    setIsOpen(false);
+    setModalState("loading");
+
+    setTimeout(() => {
+      // Prepare order payload
+      const payload: OrderPayload = {
+        discount: 0,
+        items: orderItems.map((item) => ({
+          productId: item.id,
+          qty: item.qty,
+        })),
+      };
+
+      // hook to call create order api
+      createOrderMutate(payload, {
+        onSuccess: () => {
+          //toast.success("Order placed successfully!");
+          //clear cart and reset states after successfully
+          setOrderItems([]);
+
+          setModalState("success");
+          setTimeout(() => {
+            setModalState("idle"); // closes modal
+          }, 2000); // ⏱ 2 seconds
+        },
+        onError: () => {
+          setModalState("error");
+        },
+      });
+    }, 1500);
+  };
 
   return (
     <>
@@ -373,7 +498,7 @@ export const PosPage = () => {
                   className="cursor-pointer transition-shadow hover:shadow-lg p-0"
                   onClick={() => addToCart(item)}
                 >
-                  <CardContent className="p-0 h-[40vh] sm:h-[40vh] xl:h-[35vh]">
+                  <CardContent className="p-0 h-[40vh] sm:h-[40vh] xl:h-[34vh]">
                     <div className="relative aspect-video overflow-hidden rounded-t-lg h-[60%] w-full">
                       <img
                         src={
@@ -413,12 +538,13 @@ export const PosPage = () => {
         <div className="flex flex-col border-l overflow-auto h-90 md:h-auto md:w-90 xl:w-100 2xl:w-full relative">
           <div className="border-b p-4.5">
             <div className="flex items-center justify-between">
-              <h2 className="font-semibold">
-                Draft #{draftNumber.toString().padStart(3, "0")}
-              </h2>
+              <h2 className="font-semibold">Cart Items</h2>
               <div className="flex items-center gap-2">
                 <Plus className="text-muted-foreground h-4 w-4" />
-                <Trash2 className="text-muted-foreground h-4 w-4" />
+                <Trash2
+                  onClick={clearAllCartItems}
+                  className="text-muted-foreground h-4 w-4 text-red-600 cursor-pointer"
+                />
               </div>
             </div>
           </div>
@@ -452,18 +578,34 @@ export const PosPage = () => {
 
                     {/* Row 1 - RIGHT (Trash) */}
                     <div className="justify-self-end">
-                      <Trash2 className="h-4 w-4 text-red-600 cursor-pointer" />
+                      <Trash2
+                        onClick={() => removeFromCart(item.id, item.qty)}
+                        className="h-4 w-4 text-red-600 cursor-pointer"
+                      />
                     </div>
 
                     {/* Row 2 - LEFT (Qty) */}
                     <div className="flex items-end gap-3 py-1 ">
-                      <button className="p-[4px] rounded bg-gray-100 hover:bg-gray-300">
+                      <button
+                        className={`p-[4px] rounded bg-gray-100 hover:bg-gray-300 `}
+                        onClick={() => decreaseQty(item.id)}
+                      >
                         <Minus className="w-4 h-4" />
                       </button>
 
                       <span>{item.qty}</span>
 
-                      <button className="p-[4px] rounded bg-blue-600 hover:bg-blue-700">
+                      <button
+                        //className="p-[4px] rounded bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-400"
+                        className={`p-[4px] rounded transition-colors
+                            ${
+                              getAvailableStock(item.id) <= 0
+                                ? "bg-gray-400 cursor-not-allowed opacity-50"
+                                : "bg-blue-600 hover:bg-blue-700 cursor-pointer"
+                            }`}
+                        onClick={() => increaseQty(item.id)}
+                        disabled={getAvailableStock(item.id) <= 0}
+                      >
                         <Plus className="w-4 h-4 text-white" />
                       </button>
                     </div>
@@ -471,7 +613,8 @@ export const PosPage = () => {
                     {/* Row 2 - RIGHT (Price) */}
                     <div className="justify-end items-end self-end text-right py-1 font-semibold bg-amber-200">
                       <span className="font-semibold">
-                        ${item.price * item.qty}
+                        {/* ${item.price * item.qty} */}
+                        <span>${(item.price * item.qty).toFixed(2)}</span>
                       </span>
                     </div>
                   </div>
@@ -490,12 +633,14 @@ export const PosPage = () => {
               {/* Tax */}
               <div className="flex justify-between text-sm">
                 <span>Tax</span>
-                <span>{tax.toFixed(2)}$</span>
+                <span>0$</span>
+                {/* <span>{tax.toFixed(2)}$</span> */}
               </div>
               {/* Discount */}
               <div className="flex justify-between text-sm">
                 <span>Discount</span>
-                <span>{tax.toFixed(2)}$</span>
+                {/* <span>{tax.toFixed(2)}$</span> */}
+                <span>0$</span>
               </div>
               <Separator />
               <div className="flex justify-between font-semibold">
@@ -534,12 +679,137 @@ export const PosPage = () => {
               </Button>
             </div>
 
-            <Button className="w-full bg-blue-600 py-3 text-white hover:bg-blue-700">
+            <Button
+              onClick={() => setIsOpen(true)}
+              className={`w-full bg-blue-600 py-3 text-white hover:bg-blue-700`}
+            >
               Checkout ${total.toFixed(2)}
             </Button>
           </div>
         </div>
       </div>
+
+      {/*  Checkout Dialog */}
+      <CheckoutDialog
+        open={isOpen}
+        setOpen={() => setIsOpen(false)}
+        isCancel={false}
+        width="40%"
+        title="Order summary"
+      >
+        <div className="space-y-2">
+          {orderItems.map((item, index) => (
+            <div
+              key={`${item.id}-${index}`}
+              className="flex items-center gap-2 "
+            >
+              <div className="bg-white flex h-18 w-24 items-center justify-center rounded-sm">
+                {/* <span className="text-lg">{index + 1}</span> */}
+                <div className="">
+                  <img
+                    src={item.imageUrl}
+                    alt={item.name}
+                    className="h-full w-full object-contain object-center rounded-lg"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 grid-rows-1 w-full place-content-between">
+                {/* Row 1 - LEFT */}
+                <div className="flex flex-col ">
+                  <h4 className="text-[16px] font-medium">{item.name}</h4>
+                  <p className="text-muted-foreground text-xs">
+                    {item.category ?? ""}
+                  </p>
+                  {/* Row 2 - LEFT (Qty) */}
+                  <div className="flex flex-wrap items-end gap-1 ">
+                    <span className="text-gray-500 text-[12px]">
+                      {item.qty} X
+                    </span>
+                    <span className="text-[12px] font-bold pt-0.5 text-blue-600">
+                      ${item.price}
+                    </span>
+                  </div>
+                </div>
+                {/* Row 2 - RIGHT (Price) */}
+                <div className="h-full flex justify-end items-cente text-right py-1 font-semibold ">
+                  <span className="font-semibold">
+                    {/* ${item.price * item.qty} */}
+                    <span>${(item.price * item.qty).toFixed(2)}</span>
+                  </span>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="flex justify-end mt-2">
+          <p className="text-xl">Total: $ {total.toFixed(2)}</p>
+        </div>
+
+        <Button
+          onClick={handlePlaceOrder}
+          type="button"
+          disabled={isPending}
+          className="w-full mt-3 bg-blue-600 hover:bg-blue-700"
+        >
+          {isPending ? <Spinner className="text-white" /> : ""}
+          {isPending ? "Placing Order..." : "Place Order"}
+        </Button>
+      </CheckoutDialog>
+
+      {/* Loading modal */}
+      {modalState !== "idle" && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs">
+          <div className="bg-white rounded-md shadow-xl p-8 w-[320px] text-center transition-all duration-300 scale-100">
+            {modalState === "loading" && (
+              <div className="flex flex-col items-center gap-4">
+                <div className="h-12 w-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
+                <p className="text-lg font-medium text-gray-700">
+                  Processing your order...
+                </p>
+              </div>
+            )}
+
+            {modalState === "success" && (
+              <div className="flex flex-col items-center gap-4">
+                <Button
+                  variant="ghost"
+                  className="fixed right-1 top-1 px-0.5 py-0.5 text-red-600"
+                >
+                  <CircleX />
+                </Button>
+                <div className="h-16 w-16 flex items-center justify-center rounded-full bg-green-100">
+                  <svg
+                    className="w-12 h-12 text-green-600"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth={3}
+                    viewBox="0 0 24 24"
+                  >
+                    <path d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <p className="text-lg font-semibold text-gray-800">
+                  Order Create Successfully
+                </p>
+              </div>
+            )}
+
+            {/* {modalState === "error" && (
+              <div className="flex flex-col items-center gap-4">
+                <p className="text-red-500 font-medium">Something went wrong</p>
+
+                <button
+                  // onClick={() => setStatus("idle")}
+                  className="px-4 py-2 bg-red-500 text-white rounded-lg"
+                >
+                  Close
+                </button>
+              </div>
+            )} */}
+          </div>
+        </div>
+      )}
     </>
   );
 };

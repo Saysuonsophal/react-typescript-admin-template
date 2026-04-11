@@ -11,7 +11,7 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import { data } from "react-router-dom";
+//import { data } from "react-router-dom";
 
 //userQuery using for GET method
 export const useCategories = (
@@ -22,9 +22,9 @@ export const useCategories = (
   return useQuery({
     queryKey: ["categories", search, page, limit], //key catch
     queryFn: () => getCategory(search, page, limit), // API
-    
+
     staleTime: 100 * 60 * 10,
-   placeholderData: keepPreviousData, //keep data when fetch new data
+    placeholderData: keepPreviousData, //keep data when fetch new data
     // refetchOnMount: false,
     // refetchOnWindowFocus: false,
     // refetchOnReconnect: false,

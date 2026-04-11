@@ -165,6 +165,7 @@ export const ProductFormPage = ({ open, onClose, products }: Props) => {
               }
 
               toast.success("Create product successfully");
+
               //clear file upload and preview after update successfully
               setUploadedFiles([]);
               onClose(false);
@@ -191,7 +192,7 @@ export const ProductFormPage = ({ open, onClose, products }: Props) => {
     }
   }, [open]);
 
-  // Function handlers for file upload
+  // Function handlers for file image upload
   const handleFileSelect = (files: FileList | null) => {
     if (!files) return;
 
