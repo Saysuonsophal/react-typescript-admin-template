@@ -15,12 +15,19 @@ import {
 import { toast } from "sonner";
 import type { productSchema } from "@/schemas/product.schema";
 
-export function useGetProduct(search?: string, page?: number, limit?: number) {
+export function useGetProduct(
+  search?: string,
+  page?: number,
+  limit?: number,
+  categoryId?: number,
+) {
   return useQuery({
-    queryKey: ["products", search, page, limit],
-    queryFn: () => getProduct(search, page, limit),
+    queryKey: ["products", search, page, limit, categoryId],
+    queryFn: () => getProduct(search, page, limit, categoryId),
     staleTime: 100 * 60 * 10,
     placeholderData: keepPreviousData,
+    refetchOnMount: false,
+    refetchOnReconnect: true,
   });
 }
 

@@ -159,9 +159,10 @@ export default defineConfig([
     - API service (DELETE)
     - uesMutation hook (set logic for create or update in form)
 18. Search Feature in Product (Debounce)
-    - setup Debounce library
-    - making Input and catch value using input `onChange` event & useState
-    - Apply debounce to delay the search request (using a debounce library)
+    - setup/install Debounce library
+    - making Input search element and catch value using input `onChange` event & useState
+    - Create State(value) for store value Input search element
+    - Create a Variable for getting State(value) and time using a debounce library(useDebounce(value, 1000))
     - past debounce value to TanStack Query hook (`queryKey` + `queryFn`) by parameter + type
     - Search parameter sent to backend API fetch
     - Bakend route receive the search query and filters products accordingly.
@@ -316,8 +317,15 @@ export default defineConfig([
       - set fn to button Payment
         - prepare payload variable same Data Type in API
         - adding payload to Callig Hook(Tanstack)
-        - Making success Modal popup when OnSuccess Hook 
-
-
+        - Making success & loading & Error Modal popup when OnSuccess Hook
+30. Filter Category Id with Backend
+    - Making Filter Category in Backend rout GET(product)
+    - Making Render Category UI in Frontend
+      - Adding Function click for Onclick render Category (pass CategoryId of Category)
+      - Create State (store CategoryId) and type (number | undefined) for default value (undefined)
+      - Pass State (store categoryID) to Calling Hook(TanStack) use in POS page
+    - Past CategoryId (User click on UI) to TanStack Query hook (`queryKey` + `queryFn`) by parameter + type
+    - Past parameter(CategoryId) sent to backend(key: CategoryId) API fetch Product
+31. Search
 
 # react-typescript-admin-template

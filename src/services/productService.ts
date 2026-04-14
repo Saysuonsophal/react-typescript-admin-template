@@ -23,12 +23,14 @@ export const getProduct = async (
   search?: string,
   page: number = 1,
   limit: number = 10,
+  categoryId?: number,
 ) => {
   const data = await api.get(`/api/v1/products`, {
     params: {
       search,
       page,
       limit,
+      categoryId,
     },
   });
   return data;

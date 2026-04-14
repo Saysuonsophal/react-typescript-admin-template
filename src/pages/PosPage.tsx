@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -22,6 +22,9 @@ import {
   QrCode,
   Minus,
   CircleX,
+  ShoppingCart,
+  Search,
+  X,
 } from "lucide-react";
 import { useGetProduct } from "@/hooks/useCreateProduct";
 import type { IProduct } from "@/components/types/products";
@@ -29,12 +32,17 @@ import { useCategories } from "@/hooks/useCategory";
 import type { ICategory } from "@/components/types/category";
 import { toast } from "sonner";
 import type { ICart } from "@/components/types/cart";
-import { set } from "date-fns";
+
 import CheckoutDialog from "@/components/CheckoutDialog";
 
 import { useCreateOrder } from "@/hooks/useOrder";
 import type { OrderPayload } from "@/services/order.service";
 import { Spinner } from "@/components/ui/spinner";
+import { Skeleton } from "@/components/ui/skeleton";
+
+import { cn } from "@/lib/utils";
+import { useDebounce } from "use-debounce";
+import { Input } from "@/components/ui/input";
 
 interface MenuItem {
   id: string;
@@ -45,164 +53,181 @@ interface MenuItem {
   description?: string;
 }
 
-interface OrderItem extends MenuItem {
-  quantity: number;
-}
+// interface OrderItem extends MenuItem {
+//   quantity: number;
+// }
 
-const categories = [
-  { name: "Burger", icon: "🍔" },
-  { name: "Hot Dog", icon: "🌭" },
-  { name: "Pizza", icon: "🍕" },
-  { name: "Sandwich", icon: "🥪" },
-  { name: "Popcorn", icon: "🍿" },
-  { name: "Taco", icon: "🌮" },
-  { name: "Burrito", icon: "🌯" },
-  { name: "Pizza", icon: "🍕" },
-  { name: "Burrito", icon: "🌯" },
-];
-
-const menuItems: MenuItem[] = [
-  {
-    id: "1",
-    name: "Duck Salad",
-    category: "Pizza",
-    price: 35.0,
-    image: "/hat.jpeg",
-  },
-  {
-    id: "2",
-    name: "Breakfast board",
-    category: "Taco",
-    price: 14.0,
-    image: "/hat2.jpeg",
-  },
-  {
-    id: "3",
-    name: "Hummus",
-    category: "Sandwich",
-    price: 24.0,
-    image: "/placeholder.svg?height=200&width=300",
-  },
-  {
-    id: "4",
-    name: "Roast beef",
-    category: "Kebab",
-    price: 17.5,
-    image: "/placeholder.svg?height=200&width=300",
-  },
-  {
-    id: "5",
-    name: "Tuna salad",
-    category: "Popcorn",
-    price: 35.0,
-    image: "/placeholder.svg?height=200&width=300",
-  },
-  {
-    id: "6",
-    name: "Salmon",
-    category: "Burger",
-    price: 48.0,
-    image: "/placeholder.svg?height=200&width=300",
-  },
-  {
-    id: "7",
-    name: "California roll",
-    category: "Taco",
-    price: 74.0,
-    image: "/placeholder.svg?height=200&width=300",
-  },
-  {
-    id: "8",
-    name: "Sashimi",
-    category: "Burrito",
-    price: 74.0,
-    image: "/placeholder.svg?height=200&width=300",
-  },
-  {
-    id: "8",
-    name: "Sashimi",
-    category: "Burrito",
-    price: 74.0,
-    image: "/placeholder.svg?height=200&width=300",
-  },
-  {
-    id: "8",
-    name: "Sashimi",
-    category: "Burrito",
-    price: 74.0,
-    image: "/placeholder.svg?height=200&width=300",
-  },
-  {
-    id: "8",
-    name: "Sashimi",
-    category: "Burrito",
-    price: 74.0,
-    image: "/placeholder.svg?height=200&width=300",
-  },
-  {
-    id: "8",
-    name: "Sashimi",
-    category: "Burrito",
-    price: 74.0,
-    image: "/placeholder.svg?height=200&width=300",
-  },
-  {
-    id: "8",
-    name: "Sashimi",
-    category: "Burrito",
-    price: 74.0,
-    image: "/placeholder.svg?height=200&width=300",
-  },
-];
+// const menuItems: MenuItem[] = [
+//   {
+//     id: "1",
+//     name: "Duck Salad",
+//     category: "Pizza",
+//     price: 35.0,
+//     image: "/hat.jpeg",
+//   },
+//   {
+//     id: "2",
+//     name: "Breakfast board",
+//     category: "Taco",
+//     price: 14.0,
+//     image: "/hat2.jpeg",
+//   },
+//   {
+//     id: "3",
+//     name: "Hummus",
+//     category: "Sandwich",
+//     price: 24.0,
+//     image: "/placeholder.svg?height=200&width=300",
+//   },
+//   {
+//     id: "4",
+//     name: "Roast beef",
+//     category: "Kebab",
+//     price: 17.5,
+//     image: "/placeholder.svg?height=200&width=300",
+//   },
+//   {
+//     id: "5",
+//     name: "Tuna salad",
+//     category: "Popcorn",
+//     price: 35.0,
+//     image: "/placeholder.svg?height=200&width=300",
+//   },
+//   {
+//     id: "6",
+//     name: "Salmon",
+//     category: "Burger",
+//     price: 48.0,
+//     image: "/placeholder.svg?height=200&width=300",
+//   },
+//   {
+//     id: "7",
+//     name: "California roll",
+//     category: "Taco",
+//     price: 74.0,
+//     image: "/placeholder.svg?height=200&width=300",
+//   },
+//   {
+//     id: "8",
+//     name: "Sashimi",
+//     category: "Burrito",
+//     price: 74.0,
+//     image: "/placeholder.svg?height=200&width=300",
+//   },
+//   {
+//     id: "8",
+//     name: "Sashimi",
+//     category: "Burrito",
+//     price: 74.0,
+//     image: "/placeholder.svg?height=200&width=300",
+//   },
+//   {
+//     id: "8",
+//     name: "Sashimi",
+//     category: "Burrito",
+//     price: 74.0,
+//     image: "/placeholder.svg?height=200&width=300",
+//   },
+//   {
+//     id: "8",
+//     name: "Sashimi",
+//     category: "Burrito",
+//     price: 74.0,
+//     image: "/placeholder.svg?height=200&width=300",
+//   },
+//   {
+//     id: "8",
+//     name: "Sashimi",
+//     category: "Burrito",
+//     price: 74.0,
+//     image: "/placeholder.svg?height=200&width=300",
+//   },
+//   {
+//     id: "8",
+//     name: "Sashimi",
+//     category: "Burrito",
+//     price: 74.0,
+//     image: "/placeholder.svg?height=200&width=300",
+//   },
+// ];
 
 export const PosPage = () => {
-  const [selectedCategory, setSelectedCategory] = useState<string>("All");
+  const [selectedCategory, setSelectedCategory] = useState<number | undefined>(
+    undefined,
+  );
   const [orderItems, setOrderItems] = useState<ICart[]>([]);
   const [isOpen, setIsOpen] = useState(false);
 
+  //search Debound
+
+  const [searchInput, setSearchInput] = useState("");
+  const [search] = useDebounce(searchInput, 500);
+
+  const [searchOpen, setSearchOpen] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+
   //fetch Product data from api
-  const { data: productData } = useGetProduct();
+  const {
+    data: productData,
+    error: productError,
+    isLoading: isProductLoading,
+  } = useGetProduct(search, 1, 10, selectedCategory);
+
+  //const isBackendDown = isFetched && !isFetched && productError;
+
   //fetch Category from api
-  const { data: categoryData } = useCategories();
+  const {
+    data: categoryData,
+    error: categoryError,
+    isLoading: isCategoryLoading,
+  } = useCategories();
+
   //fetch Order data from api
   const { mutate: createOrderMutate, isPending } = useCreateOrder();
-
   const [modalState, setModalState] = useState("idle"); // "idle" | "loading" | "success" | "error"
 
   //const products = (productData?.data as IProduct[]) ?? [];
-  //console.log("Fetched Products:", products);
+
   const categories = (categoryData?.data as ICategory[]) ?? [];
   const [products, setProducts] = useState<IProduct[]>([]);
 
-  // 👉 choose source dynamically
-  const displayProducts =
-    products.length > 0 ? products : ((productData?.data as IProduct[]) ?? []);
+  // Sync local products state whenever API data changes (e.g. category filter)
+  useEffect(() => {
+    if (productData?.data) {
+      const freshProducts = productData.data as IProduct[];
 
-  // console.log("Initial Stock:", displayProducts);
+      // Re-apply cart deductions so stock stays accurate after category switch
+      const adjusted = freshProducts.map((p) => {
+        const cartItem = orderItems.find((item) => item.id === p.id);
+        return cartItem ? { ...p, qty: p.qty - cartItem.qty } : p;
+      });
 
-  //  const [selectedCategory, setSelectedCategory] = useState(null);
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setProducts(adjusted);
+    }
+  }, [productData, orderItems]);
+
+  // ✅ FIX: Always use local state (kept in sync by useEffect above)
+  const displayProducts = products;
+
+  // const [selectedCategory, setSelectedCategory] = useState(null);
   // const [orderItems, setOrderItems] = useState([]);
   // const [sidebarOpen, setSidebarOpen] = useState(false);
   // const draftNumber = 1;
 
   // Get order item(object) when user click adding order
   const addToCart = (product: IProduct) => {
-    console.log("Adding to order item Object:", product);
-
     //logic: check stock availability
     if (product.qty <= 0) {
       toast.warning("Sorry, this item is out of stock.");
       return;
     }
-    // Update stock after adding to order
-    setProducts((prev) => {
-      const source =
-        prev.length > 0 ? prev : ((productData?.data as IProduct[]) ?? []);
 
-      return source.map((p) =>
-        p.id === product.id ? { ...p, qty: p.qty - 1 } : p,
-      );
-    });
+    // Update stock after adding to order
+    // ✅ FIX: Simplified — no fallback source needed
+    setProducts((prev) =>
+      prev.map((p) => (p.id === product.id ? { ...p, qty: p.qty - 1 } : p)),
+    );
 
     //Logic: Update order items state(old state(prev)) in Cart
     setOrderItems((prev) => {
@@ -244,21 +269,13 @@ export const PosPage = () => {
 
   // check stock availability before allowing QTY increase
   const getAvailableStock = (id: number): number => {
-    const productList =
-      products.length > 0
-        ? products
-        : ((productData?.data as IProduct[]) ?? []);
-    return productList.find((p) => p.id === id)?.qty ?? 0;
+    return products.find((p) => p.id === id)?.qty ?? 0;
   };
 
   const increaseQty = (id: number) => {
     // Single source of truth: resolve the product list once, outside both setters
-    const productList: IProduct[] =
-      products.length > 0
-        ? products
-        : ((productData?.data as IProduct[]) ?? []);
 
-    const currentItem = productList.find((p) => p.id === id);
+    const currentItem = products.find((p) => p.id === id);
 
     //check stock availability before updating state
     if (!currentItem || currentItem.qty <= 0) {
@@ -311,23 +328,16 @@ export const PosPage = () => {
     console.log("Updated Order Items after removal:", orderItems);
 
     //restore stock on Product Card when remove item from Cart
-    setProducts((prev) => {
-      const source =
-        prev.length > 0 ? prev : ((productData?.data as IProduct[]) ?? []);
-      return source.map((prev) =>
-        prev.id === id ? { ...prev, qty: prev.qty + qty } : prev,
-      );
-    });
+    setProducts((prev) =>
+      prev.map((p) => (p.id === id ? { ...p, qty: p.qty + qty } : p)),
+    );
   };
   const clearAllCartItems = () => {
+    if (orderItems.length <= 0) {
+      return;
+    }
+
     if (!window.confirm("Clear all items, Are you sure?")) return;
-    // orderItems.forEach((item) => {
-    //   setProducts((prev) =>
-    //     prev.map((p) =>
-    //       p.id === item.id ? { ...p, qty: p.qty + item.qty } : p,
-    //     ),
-    //   );
-    // });
 
     setProducts(
       (prev) => (
@@ -392,6 +402,25 @@ export const PosPage = () => {
     }, 1500);
   };
 
+  // All Category & counter(products)
+  const allcategories = [
+    {
+      id: undefined,
+      name: "All",
+    },
+    ...categories,
+  ];
+
+  // Search Name in POS
+  const toggleSearch = () => {
+    if (searchOpen) {
+      setSearchOpen(false);
+      setSearchInput("");
+    } else {
+      setSearchOpen(true);
+      setTimeout(() => inputRef.current?.focus(), 250); // wait for animation
+    }
+  };
   return (
     <>
       <div className="grid grid-cols-1 lg:h-[84vh] md:h-[80vh] grid-rows-[auto_1fr_auto] lg:grid-cols-[3fr_1fr] md:grid-cols-[2fr_1fr]  overflow-auto">
@@ -462,7 +491,45 @@ export const PosPage = () => {
           <div className="border-b p-4">
             <div className="flex items-center justify-between">
               <h1 className="text-xl font-semibold">Categories</h1>
+
               <div className="flex items-center gap-2">
+                {/* Search Debounce */}
+                <div
+                  className={cn(
+                    "flex items-center overflow-hidden h-9 border rounded-md transition-all duration-250",
+                    searchOpen
+                      ? "w-70 border-border"
+                      : "w-9 border-transparent",
+                  )}
+                >
+                  <button
+                    onClick={toggleSearch}
+                    className="shrink-0 w-9 h-9 flex items-center hover:bg-gray-200 justify-center"
+                  >
+                    <Search className="w-4 h-4 text-muted-foreground" />
+                  </button>
+                  <input
+                    ref={inputRef}
+                    type="text"
+                    placeholder="Search products..."
+                    value={searchInput}
+                    onChange={(e) => setSearchInput(e.target.value)}
+                    className={cn(
+                      "flex-1 text-sm bg-transparent outline-none pr-2 pl-2 transition-opacity duration-200 min-w-0",
+                      searchOpen
+                        ? "opacity-100 pointer-events-auto"
+                        : "opacity-0 pointer-events-none",
+                    )}
+                  />
+                  {searchInput && (
+                    <button
+                      onClick={() => setSearchInput("")}
+                      className="shrink-0 mr-1.5 ..."
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  )}
+                </div>
                 <ChevronLeft className="text-muted-foreground h-5 w-5" />
                 <ChevronRight className="text-muted-foreground h-5 w-5" />
               </div>
@@ -470,32 +537,118 @@ export const PosPage = () => {
           </div>
 
           {/* Categories */}
-          <div className="border-b p-4">
-            <div className="flex gap-4 overflow-x-auto">
-              {categories.map((category, index) => (
+          <div className="border-b pl-4 pt-4 pr-4">
+            <div className="flex gap-4 overflow-x-auto pb-4">
+              {/* Skeleton loading. backend down  */}
+              {(categoryError || isCategoryLoading) &&
+                Array.from({ length: 8 }).map((_, index) => (
+                  <div
+                    key={index}
+                    className="min-w-[80px] flex flex-col items-center rounded-lg p-2"
+                  >
+                    <Skeleton className="mb-2 h-12 w-12 rounded-full bg-gray-200" />
+                    <Skeleton className="h-3 w-14 bg-gray-200" />
+                  </div>
+                ))}
+
+              {/* or other ways */}
+
+              {/* {categories.length === 0
+                ? Array.from({ length: 8 }).map((_, index) => (
+                    <div
+                      key={index}
+                      className="min-w-[80px] flex flex-col items-center rounded-lg p-2"
+                    >
+                      <Skeleton className="mb-2 h-12 w-12 rounded-full bg-gray-200" />
+                      <Skeleton className="h-3 w-14 bg-gray-200" />
+                    </div>
+                  ))
+                : categories.map((category, index) => (
+                    <div
+                      key={index}
+                      className="hover:bg-muted flex min-w-[80px] cursor-pointer flex-col items-center rounded-lg p-2"
+                      onClick={() => setSelectedCategory(category.name)}
+                    >
+                      <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-orange-100 text-2xl">
+                        {category.icon}
+                      </div>
+                      <span className="text-muted-foreground text-center text-xs">
+                        {category.name}
+                      </span>
+                    </div>
+                  ))} */}
+
+              {/* Category secssion */}
+              {allcategories.map((category, index) => (
                 <div
                   key={index}
-                  className="hover:bg-muted flex min-w-[80px] cursor-pointer flex-col items-center rounded-lg p-2"
-                  onClick={() => setSelectedCategory(category.name)}
+                  //className="hover:bg-muted flex max-w-auto cursor-pointer bg-amber-300 flex-row items-center rounded-lg p-2"
+                  className={cn(
+                    "flex cursor-pointer flex-row items-center gap-0 p-2 rounded-lg border transition-all duration-150  h-[40px]",
+                    selectedCategory === category.id
+                      ? "border-blue-300 bg-blue-50 shadow-sm"
+                      : "border-border bg-background hover:bg-muted",
+                  )}
+                  //onClick={() => setSelectedCategory(category.id)}
+                  onClick={() =>
+                    setSelectedCategory(
+                      category.id === undefined ? undefined : category.id,
+                    )
+                  }
                 >
-                  <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-orange-100 text-2xl">
+                  {/* <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-orange-100 text-2xl">
                     {category.icon}
-                  </div>
-                  <span className="text-muted-foreground text-center text-xs">
+                  </div> */}
+
+                  <span className="w-max text-muted-foreground text-black text-center text-sm px-1">
                     {category.name}
                   </span>
+                  <div
+                    className={cn(
+                      " px-2",
+                      selectedCategory === category.id
+                        ? "border-blue-300"
+                        : "border-border",
+                    )}
+                  >
+                    <span
+                      className={cn(
+                        "text-[10px] font-semibold rounded px-1.5 py-0.5",
+                        selectedCategory === category.id
+                          ? "bg-blue-100 text-blue-700"
+                          : "bg-muted text-muted-foreground",
+                      )}
+                    >
+                      0
+                    </span>
+                  </div>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* Menu Items Grid */}
+          {/* Product Render */}
           <div className="flex-1 overflow-auto overflow-y-auto py-6 pr-4 pl-2">
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+              {(productError || isProductLoading) &&
+                Array.from({ length: 10 }).map((_, i) => (
+                  <div key={i} className="animate-pulse rounded-lg border p-2">
+                    <div className="h-32 bg-gray-200 rounded mb-2" />
+                    <div className="h-4 bg-gray-200 rounded w-3/4 mb-1" />
+                    <div className="h-3 bg-gray-200 rounded w-1/2 mb-2" />
+                    <div className="h-4 bg-gray-200 rounded w-1/3" />
+                  </div>
+                ))}
               {displayProducts.map((item: IProduct) => (
                 <Card
                   key={item.id}
-                  className="cursor-pointer transition-shadow hover:shadow-lg p-0"
+                  //className="cursor-pointer transition-shadow hover:shadow-lg p-0"
+                  // className={`p-0 transition-shadow ${
+                  //   isBackendDown
+                  //     ? "opacity-40 pointer-events-none cursor-not-allowed"
+                  //     : "cursor-pointer hover:shadow-lg"
+                  // }`}
+                  className="p-0 transition-shadow cursor-pointer"
                   onClick={() => addToCart(item)}
                 >
                   <CardContent className="p-0 h-[40vh] sm:h-[40vh] xl:h-[34vh]">
@@ -540,10 +693,10 @@ export const PosPage = () => {
             <div className="flex items-center justify-between">
               <h2 className="font-semibold">Cart Items</h2>
               <div className="flex items-center gap-2">
-                <Plus className="text-muted-foreground h-4 w-4" />
                 <Trash2
                   onClick={clearAllCartItems}
-                  className="text-muted-foreground h-4 w-4 text-red-600 cursor-pointer"
+                  className={`text-muted-foreground h-4 w-4 text-red-600 cursor-pointer 
+                  `}
                 />
               </div>
             </div>
@@ -551,75 +704,83 @@ export const PosPage = () => {
 
           <ScrollArea className="overflow-y-auto h-[50vh] 2xl:h-screen">
             <div className="space-y-4 p-4">
-              {orderItems.map((item, index) => (
-                <div
-                  key={`${item.id}-${index}`}
-                  className="flex items-center gap-1 "
-                >
-                  <div className="bg-white flex h-18 w-20 items-center justify-center rounded-sm">
-                    {/* <span className="text-lg">{index + 1}</span> */}
-                    <div className="">
-                      <img
-                        src={item.imageUrl}
-                        alt={item.name}
-                        className="h-full w-full object-contain object-center rounded-lg"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-[1fr_auto] grid-rows-2 gap-x-2 w-full place-content-between">
-                    {/* Row 1 - LEFT */}
-                    <div>
-                      <h4 className="text-sm font-medium">{item.name}</h4>
-                      <p className="text-muted-foreground text-xs">
-                        {item.category ?? ""}
-                      </p>
+              {productError || !orderItems || orderItems.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-[30vh] text-center text-gray-400">
+                  <ShoppingCart className="w-12 h-12 mb-3 opacity-50" />
+                  <p className="text-lg font-semibold">Cart is empty</p>
+                  <p className="text-sm">Start adding items to your cart</p>
+                </div>
+              ) : (
+                orderItems.map((item, index) => (
+                  <div
+                    key={`${item.id}-${index}`}
+                    className="flex items-center gap-1 "
+                  >
+                    <div className="bg-white flex h-18 w-20 items-center justify-center rounded-sm">
+                      {/* <span className="text-lg">{index + 1}</span> */}
+                      <div className="">
+                        <img
+                          src={item.imageUrl}
+                          alt={item.name}
+                          className="h-full w-full object-contain object-center rounded-lg"
+                        />
+                      </div>
                     </div>
 
-                    {/* Row 1 - RIGHT (Trash) */}
-                    <div className="justify-self-end">
-                      <Trash2
-                        onClick={() => removeFromCart(item.id, item.qty)}
-                        className="h-4 w-4 text-red-600 cursor-pointer"
-                      />
-                    </div>
+                    <div className="grid grid-cols-[1fr_auto] grid-rows-2 gap-x-2 w-full place-content-between">
+                      {/* Row 1 - LEFT */}
+                      <div>
+                        <h4 className="text-sm font-medium">{item.name}</h4>
+                        <p className="text-muted-foreground text-xs">
+                          {item.category ?? ""}
+                        </p>
+                      </div>
 
-                    {/* Row 2 - LEFT (Qty) */}
-                    <div className="flex items-end gap-3 py-1 ">
-                      <button
-                        className={`p-[4px] rounded bg-gray-100 hover:bg-gray-300 `}
-                        onClick={() => decreaseQty(item.id)}
-                      >
-                        <Minus className="w-4 h-4" />
-                      </button>
+                      {/* Row 1 - RIGHT (Trash) */}
+                      <div className="justify-self-end">
+                        <Trash2
+                          onClick={() => removeFromCart(item.id, item.qty)}
+                          className="h-4 w-4 text-red-600 cursor-pointer"
+                        />
+                      </div>
 
-                      <span>{item.qty}</span>
+                      {/* Row 2 - LEFT (Qty) */}
+                      <div className="flex items-end gap-3 py-1 ">
+                        <button
+                          className={`p-[4px] rounded bg-gray-100 hover:bg-gray-300 `}
+                          onClick={() => decreaseQty(item.id)}
+                        >
+                          <Minus className="w-4 h-4" />
+                        </button>
 
-                      <button
-                        //className="p-[4px] rounded bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-400"
-                        className={`p-[4px] rounded transition-colors
+                        <span>{item.qty}</span>
+
+                        <button
+                          //className="p-[4px] rounded bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-400"
+                          className={`p-[4px] rounded transition-colors
                             ${
                               getAvailableStock(item.id) <= 0
                                 ? "bg-gray-400 cursor-not-allowed opacity-50"
                                 : "bg-blue-600 hover:bg-blue-700 cursor-pointer"
                             }`}
-                        onClick={() => increaseQty(item.id)}
-                        disabled={getAvailableStock(item.id) <= 0}
-                      >
-                        <Plus className="w-4 h-4 text-white" />
-                      </button>
-                    </div>
+                          onClick={() => increaseQty(item.id)}
+                          disabled={getAvailableStock(item.id) <= 0}
+                        >
+                          <Plus className="w-4 h-4 text-white" />
+                        </button>
+                      </div>
 
-                    {/* Row 2 - RIGHT (Price) */}
-                    <div className="justify-end items-end self-end text-right py-1 font-semibold bg-amber-200">
-                      <span className="font-semibold">
-                        {/* ${item.price * item.qty} */}
-                        <span>${(item.price * item.qty).toFixed(2)}</span>
-                      </span>
+                      {/* Row 2 - RIGHT (Price) */}
+                      <div className="justify-end items-end self-end text-right py-1 font-semibold bg-amber-200">
+                        <span className="font-semibold">
+                          {/* ${item.price * item.qty} */}
+                          <span>${(item.price * item.qty).toFixed(2)}</span>
+                        </span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))
+              )}
             </div>
           </ScrollArea>
 
@@ -757,7 +918,7 @@ export const PosPage = () => {
         </Button>
       </CheckoutDialog>
 
-      {/* Loading modal */}
+      {/* Loading, Success, Error modal */}
       {modalState !== "idle" && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs">
           <div className="bg-white rounded-md shadow-xl p-8 w-[320px] text-center transition-all duration-300 scale-100">
@@ -795,18 +956,27 @@ export const PosPage = () => {
               </div>
             )}
 
-            {/* {modalState === "error" && (
+            {modalState === "error" && (
               <div className="flex flex-col items-center gap-4">
+                <Button
+                  onClick={() => setModalState("idle")}
+                  variant="ghost"
+                  className="fixed right-1 top-1 px-0.5 py-0.5 text-red-600"
+                >
+                  <CircleX />
+                </Button>
                 <p className="text-red-500 font-medium">Something went wrong</p>
 
                 <button
-                  // onClick={() => setStatus("idle")}
+                  onClick={() => {
+                    setIsOpen(true);
+                  }}
                   className="px-4 py-2 bg-red-500 text-white rounded-lg"
                 >
                   Close
                 </button>
               </div>
-            )} */}
+            )}
           </div>
         </div>
       )}

@@ -23,11 +23,13 @@ export const useCategories = (
     queryKey: ["categories", search, page, limit], //key catch
     queryFn: () => getCategory(search, page, limit), // API
 
-    staleTime: 100 * 60 * 10,
+    staleTime: 100 * 60 * 10, //data is fresh for 10 minutes
+    //refetchInterval: 5000, //refetch data every 5s
     placeholderData: keepPreviousData, //keep data when fetch new data
-    // refetchOnMount: false,
-    // refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    //refetchOnWindowFocus: true, //refetch data when window focus
     // refetchOnReconnect: false,
+    retry: 1, //retry once when fetch data fail
   });
 };
 
