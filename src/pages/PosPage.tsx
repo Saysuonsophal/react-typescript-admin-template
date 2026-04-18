@@ -25,6 +25,7 @@ import {
   ShoppingCart,
   Search,
   X,
+  Command,
 } from "lucide-react";
 import { useGetProduct } from "@/hooks/useCreateProduct";
 import type { IProduct } from "@/components/types/products";
@@ -43,6 +44,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { useDebounce } from "use-debounce";
 import { Input } from "@/components/ui/input";
+import { useCreatePayment } from "@/hooks/usePayment";
 
 interface MenuItem {
   id: string;
@@ -184,6 +186,7 @@ export const PosPage = () => {
 
   //fetch Order data from api
   const { mutate: createOrderMutate, isPending } = useCreateOrder();
+  const { mutate: createPaymentMutate } = useCreatePayment();
   const [modalState, setModalState] = useState("idle"); // "idle" | "loading" | "success" | "error"
 
   //const products = (productData?.data as IProduct[]) ?? [];
@@ -385,15 +388,44 @@ export const PosPage = () => {
 
       // hook to call create order api
       createOrderMutate(payload, {
-        onSuccess: () => {
-          //toast.success("Order placed successfully!");
-          //clear cart and reset states after successfully
-          setOrderItems([]);
+        onSuccess: (res) => {
+          console.log("Respone", res);
+          const orderId = res.data.id;
+          console.log("orderID:", orderId);
+          //Payment ABA QR code
+          createPaymentMutate(orderId, {
+            onSuccess: (res) => {
+              console.log("Payment respone", res);
+              //condition data respon
+              if (res.data) {
+                //Call Fron Backend respone
+                const payway = res.data.payway;
+                //Popup QR Code ABA
+                const form = document.createElement("form");
+                form.id = "aba_merchant_request";
+                form.method = payway.method;
+                form.action = payway.action;
+                form.target = payway.target;
+                Object.entries(payway.fields).forEach(([key, value]) => {
+                  const input = document.createElement("input");
+                  input.type = "hidden";
+                  input.name = key;
+                  input.value = String(value);
+                  form.appendChild(input);
+                });
 
-          setModalState("success");
-          setTimeout(() => {
-            setModalState("idle"); // closes modal
-          }, 2000); // ⏱ 2 seconds
+                document.body.appendChild(form);
+                setIsOpen(false);
+                AbaPayway?.checkout();
+              }
+            },
+          });
+          //clear cart and reset states after successfully
+          // setOrderItems([]);
+          // setModalState("success");
+          // setTimeout(() => {
+          //   setModalState("idle"); // closes modal
+          // }, 2000); // ⏱ 2 seconds
         },
         onError: () => {
           setModalState("error");
@@ -855,7 +887,7 @@ export const PosPage = () => {
         open={isOpen}
         setOpen={() => setIsOpen(false)}
         isCancel={false}
-        width="40%"
+        width="60%"
         title="Order summary"
       >
         <div className="space-y-2">

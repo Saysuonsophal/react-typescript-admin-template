@@ -19,6 +19,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { ModeToggle } from "@/components/mode-toggle";
 import Modeclick from "@/components/mode-click";
 import { Toaster } from "sonner";
+import { Command, Search } from "lucide-react";
 
 const DashboardLayout = () => {
   return (
@@ -36,6 +37,18 @@ const DashboardLayout = () => {
               />
 
               {/* Global serach */}
+              <div className="flex items-center w-[250px] bg-[#fbfbfb] border border-border rounded-md  px-2 py-1.5">
+                <div className="flex items-center justify-start gap-2 max-w-sm flex-1 ">
+                  <Search className="w-4 h-4 text-gray-400" />
+                  <span className="text-sm text-gray-300">
+                    Search anything....
+                  </span>
+                </div>
+                <kbd className="flex items-center gap-1 text-[10px] bg-gray-100 text-muted-foreground border border-border rounded px-1.5 py-0.5 cursor-pointer">
+                  <Command className="w-3 h-3" />
+                  <span className="text-md">K</span>
+                </kbd>
+              </div>
             </div>
 
             {/* RIGHT SIDE */}

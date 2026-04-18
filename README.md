@@ -74,24 +74,24 @@ export default defineConfig([
 
 # Pocessing lession React + Typescript
 
-1. React Props & component
-2. Render List Array data (map())
-   -syntax
-   ```` Arrays.map((array)=>{return(compunent(property: key:{value},property:{array.columnname}))})`
+1.  React Props & component
+2.  Render List Array data (map())
+    -syntax
+    ```` Arrays.map((array)=>{return(compunent(property: key:{value},property:{array.columnname}))})`
 
-3. useState
-4. useEffect
-5. defined type ways
-   - Variable Declarations Using a colon (:)
-   - Type Alias (type)
-   - Interface (interface)
-6. Import layout (shadcn)
-7. React Router (Layout Main and dashboard)
-8. Render Data Table
-   - data-table (table, table row)
-   - columns (th) (property: ColumnDef,accessorKey, header)
-   - Input data (td)
-9. Making action button (adding, edit, view, delete)
+3.  useState
+4.  useEffect
+5.  defined type ways
+    - Variable Declarations Using a colon (:)
+    - Type Alias (type)
+    - Interface (interface)
+6.  Import layout (shadcn)
+7.  React Router (Layout Main and dashboard)
+8.  Render Data Table
+    - data-table (table, table row)
+    - columns (th) (property: ColumnDef,accessorKey, header)
+    - Input data (td)
+9.  Making action button (adding, edit, view, delete)
 10. All Filter logic
     - search
     - shorting
@@ -326,6 +326,23 @@ export default defineConfig([
       - Pass State (store categoryID) to Calling Hook(TanStack) use in POS page
     - Past CategoryId (User click on UI) to TanStack Query hook (`queryKey` + `queryFn`) by parameter + type
     - Past parameter(CategoryId) sent to backend(key: CategoryId) API fetch Product
-31. Search
+31. Search debound in POS
+32. Payment ABA in Frontend
+    - Create service API and hook
+    - Create Payment uesMutation hook (TanStack)
+    - Add code to Post Page
+      - Calling Hook(TanStack)
+      - Button Payment of onSuccess
+        - Add Payment ABA Hook
+        - assign parameter(orderID)
+        - assign onSuccess and parameter(res) get data from Backend
+        - Set Condition that having parameter(res.data)
+        - add modal Popup QR code ABA
+        - adding script of ABA to Our index.html
+
+        ```Javascript
+          <script src="https://checkout.payway.com.kh/plugins/checkout2-0.js" defer></script>
+
+        ```
 
 # react-typescript-admin-template
