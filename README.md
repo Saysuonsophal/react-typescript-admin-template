@@ -327,22 +327,35 @@ export default defineConfig([
     - Past CategoryId (User click on UI) to TanStack Query hook (`queryKey` + `queryFn`) by parameter + type
     - Past parameter(CategoryId) sent to backend(key: CategoryId) API fetch Product
 31. Search debound in POS
-32. Payment ABA in Frontend
+32. Payment ABA get/call to Backtend
     - Create service API and hook
     - Create Payment uesMutation hook (TanStack)
-    - Add code to Post Page
+    - Add code to POS Page
       - Calling Hook(TanStack)
-      - Button Payment of onSuccess
-        - Add Payment ABA Hook
+      - Add action Payment to onSuccess of hook createOrderMutate
+        - Add Payment call Hook(createPaymentMutate)
         - assign parameter(orderID)
-        - assign onSuccess and parameter(res) get data from Backend
+        - assign onSuccess and parameter(res) get datas from Backend
         - Set Condition that having parameter(res.data)
-        - add modal Popup QR code ABA
+        - inside condition form data for assign
+          - call payway object of backend repsone data
+          - Popup QR code ABA(create element form())
+
         - adding script of ABA to Our index.html
 
         ```Javascript
           <script src="https://checkout.payway.com.kh/plugins/checkout2-0.js" defer></script>
 
         ```
+
+33. Transaction Payment ABA call to Backend
+    **Noted Important:** API Transaction is action after user success KHQR or Cards payment, we musted to add action in button continues shopping for action API update status Approve of Transition
+    - Create API service and parameter(tranId)
+    - Create Hook
+    - Catching transaction from Query/Search Params URL
+      - frontend catches tranId Using Reactjs route DOM for get search params
+      - Create useEffect for tracking whenever searchParams state change (the usEffect will be action)
+      - Call Hook API and assign parameter(tranId)
+      - Remove search params after success, set useState search params is empty
 
 # react-typescript-admin-template

@@ -44,7 +44,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { useDebounce } from "use-debounce";
 import { Input } from "@/components/ui/input";
-import { useCreatePayment } from "@/hooks/usePayment";
+import { useCheckTransaction, useCreatePayment } from "@/hooks/usePayment";
+import { useSearchParams } from "react-router-dom";
+import { checkTransaction } from "@/services/payment";
 
 interface MenuItem {
   id: string;
@@ -154,6 +156,7 @@ interface MenuItem {
 // ];
 
 export const PosPage = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [selectedCategory, setSelectedCategory] = useState<number | undefined>(
     undefined,
   );
@@ -161,7 +164,6 @@ export const PosPage = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   //search Debound
-
   const [searchInput, setSearchInput] = useState("");
   const [search] = useDebounce(searchInput, 500);
 
@@ -194,6 +196,8 @@ export const PosPage = () => {
   const categories = (categoryData?.data as ICategory[]) ?? [];
   const [products, setProducts] = useState<IProduct[]>([]);
 
+  const { mutate: CheckTransactionMutate } = useCheckTransaction();
+
   // Sync local products state whenever API data changes (e.g. category filter)
   useEffect(() => {
     if (productData?.data) {
@@ -209,6 +213,20 @@ export const PosPage = () => {
       setProducts(adjusted);
     }
   }, [productData, orderItems]);
+
+  // Catchs TranId of the Query params
+  useEffect(() => {
+    // Get a single value: /search?q=react -> "react"
+    const tranId = searchParams.get("tranId");
+    if (tranId) {
+      CheckTransactionMutate(tranId, {
+        
+        onSuccess: () => {
+          setSearchParams({});
+        },
+      });
+    }
+  }, [searchParams]);
 
   // ✅ FIX: Always use local state (kept in sync by useEffect above)
   const displayProducts = products;
@@ -392,14 +410,17 @@ export const PosPage = () => {
           console.log("Respone", res);
           const orderId = res.data.id;
           console.log("orderID:", orderId);
+
           //Payment ABA QR code
           createPaymentMutate(orderId, {
             onSuccess: (res) => {
               console.log("Payment respone", res);
-              //condition data respon
+
+              //condition data respon popup QR code
               if (res.data) {
-                //Call Fron Backend respone
+                //Call From Backend respone
                 const payway = res.data.payway;
+
                 //Popup QR Code ABA
                 const form = document.createElement("form");
                 form.id = "aba_merchant_request";
@@ -420,6 +441,7 @@ export const PosPage = () => {
               }
             },
           });
+
           //clear cart and reset states after successfully
           // setOrderItems([]);
           // setModalState("success");
@@ -611,6 +633,7 @@ export const PosPage = () => {
                   ))} */}
 
               {/* Category secssion */}
+
               {allcategories.map((category, index) => (
                 <div
                   key={index}
@@ -887,7 +910,7 @@ export const PosPage = () => {
         open={isOpen}
         setOpen={() => setIsOpen(false)}
         isCancel={false}
-        width="60%"
+        width="40%"
         title="Order summary"
       >
         <div className="space-y-2">
